@@ -10,6 +10,7 @@ import nz.co.trademe.konfigure.model.ConfigChangeEvent
 import nz.co.trademe.konfigure.model.ConfigItem
 import nz.co.trademe.konfigure.model.ConfigMetadata
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KClass
 
 open class Config(
     @PublishedApi
@@ -161,8 +162,8 @@ open class Config(
      */
     @Suppress("UNCHECKED_CAST")
     inline fun <reified T: Any> resolveAdapterForType(): TypeAdapter<T> =
-        configTypeAdapters.firstOrNull { it.clazz == T::class.java } as? TypeAdapter<T>
-            ?: throw IllegalArgumentException("Type argument ${T::class.java.simpleName} is not supported by the configuration library. Have you added a TypeAdapter for this type?")
+        configTypeAdapters.firstOrNull { it.clazz == T::class } as? TypeAdapter<T>
+            ?: throw IllegalArgumentException("Type argument ${T::class.simpleName} is not supported by the configuration library. Have you added a TypeAdapter for this type?")
 
 
     inner class SubConfigApi(
@@ -174,8 +175,8 @@ open class Config(
     /**
      * Type adapter definition used mapping types from [T] to [String] synchronously
      */
-    data class TypeAdapter<T>(
-        val clazz: Class<T>,
+    data class TypeAdapter<T: Any>(
+        val clazz: KClass<T>,
         val toString: (T) -> String,
         val fromString: (String) -> T
     )
@@ -184,32 +185,32 @@ open class Config(
 
         private val DEFAULT_TYPE_ADAPTERS = hashSetOf(
             TypeAdapter(
-                clazz = Int::class.java,
+                clazz = Int::class,
                 fromString = String::toInt,
                 toString = Int::toString
             ),
             TypeAdapter(
-                clazz = Long::class.java,
+                clazz = Long::class,
                 fromString = String::toLong,
                 toString = Long::toString
             ),
             TypeAdapter(
-                clazz = Float::class.java,
+                clazz = Float::class,
                 fromString = String::toFloat,
                 toString = Float::toString
             ),
             TypeAdapter(
-                clazz = Double::class.java,
+                clazz = Double::class,
                 fromString = String::toDouble,
                 toString = Double::toString
             ),
             TypeAdapter(
-                clazz = Boolean::class.java,
+                clazz = Boolean::class,
                 fromString = String::toBoolean,
                 toString = Boolean::toString
             ),
             TypeAdapter(
-                clazz = String::class.java,
+                clazz = String::class,
                 fromString = { it },
                 toString = { it }
             ))
