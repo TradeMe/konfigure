@@ -7,7 +7,7 @@ buildscript {
         
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.2'
+        classpath "com.android.tools.build:gradle:$versions.androidgradleplugin"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
     }
 }
@@ -16,10 +16,23 @@ allprojects {
     repositories {
         google()
         jcenter()
-        
     }
 
     apply from: rootProject.file("versions.gradle")
+
+    afterEvaluate {
+        // Common library module configurations
+        if (plugins.hasPlugin("com.android.library")) {
+            android.compileSdkVersion = versions.compileSdkVersion
+
+
+            android.defaultConfig {
+                minSdkVersion versions.minSdkVersion
+                targetSdkVersion versions.targetSdkVersion
+                vectorDrawables.useSupportLibrary = true
+            }
+        }
+    }
 }
 
 task clean(type: Delete) {

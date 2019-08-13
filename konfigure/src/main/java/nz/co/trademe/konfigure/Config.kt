@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.flow
 import nz.co.trademe.konfigure.api.ConfigDelegate
 import nz.co.trademe.konfigure.api.ConfigSource
 import nz.co.trademe.konfigure.api.OverrideHandler
+import nz.co.trademe.konfigure.internal.InMemoryOverrideHandler
 import nz.co.trademe.konfigure.model.ConfigChangeEvent
 import nz.co.trademe.konfigure.model.ConfigItem
 import nz.co.trademe.konfigure.model.ConfigMetadata
@@ -16,8 +17,7 @@ open class Config(
     @PublishedApi
     internal val configSources: List<ConfigSource>,
     @PublishedApi
-    internal val overrideHandler: OverrideHandler? = null,
-    customTypeAdapters: Set<TypeAdapter<*>> = emptySet()
+    internal val overrideHandler: OverrideHandler = InMemoryOverrideHandler()
 ) {
 
     @PublishedApi
@@ -35,26 +35,21 @@ open class Config(
      * List of all modified config items binded to this config instance
      */
     val modifiedItems: List<ConfigItem<*>>
-        get() = configItems.filter { overrideHandler?.all?.contains(it.key) ?: false }
+        get() = configItems.filter { overrideHandler.contains(it.key) }
 
     /**
      * Boolean property describing if there are any local overrides present
      */
     val hasLocalOverrides: Boolean
-        get() = overrideHandler?.all?.isNotEmpty() ?: false
+        get() = overrideHandler.all.isNotEmpty()
 
     @PublishedApi
-    internal val configTypeAdapters: HashSet<TypeAdapter<*>> = hashSetOf(
-        *DEFAULT_TYPE_ADAPTERS.toTypedArray(),
-        *customTypeAdapters.toTypedArray()
-    )
+    internal val configTypeAdapters: Set<TypeAdapter<*>> = DEFAULT_TYPE_ADAPTERS
 
     /**
      * Function for clearing local overrides, if an override handler is specified
      */
     fun clearLocalOverrides() {
-        overrideHandler ?: return
-
         // Collate all changes
         val changeEvents = overrideHandler.all
             .map { entry ->
@@ -87,7 +82,7 @@ open class Config(
     inline fun <reified T : Any> getValueOf(item: ConfigItem<T>): T {
         val mapper = resolveAdapterForType<T>()
 
-        if (overrideHandler?.contains(item.key) == true) {
+        if (overrideHandler.contains(item.key)) {
             return overrideHandler.get(item.key).let(mapper.fromString)
         }
 
@@ -101,8 +96,6 @@ open class Config(
      * Function for setting the value of an item.
      */
     inline fun <reified T : Any> setValueOf(item: ConfigItem<T>, newValue: T) {
-        overrideHandler ?: return
-
         // Store old value
         val oldValue: T = getValueOf(item)
 
@@ -125,7 +118,7 @@ open class Config(
      * Main function to be used by extending classes to define various config parameters
      */
     @Suppress("MemberVisibilityCanBePrivate")
-    protected inline fun <reified T : Any> config(
+    inline fun <reified T : Any> config(
         key: String,
         defaultValue: T,
         metadata: ConfigMetadata
@@ -147,7 +140,8 @@ open class Config(
      * be unique, else it becomes ambiguous which type the return should be when retrieving values
      * from various config sources.
      */
-    protected fun validateAndAddItem(item: ConfigItem<*>) {
+    @PublishedApi
+    internal fun validateAndAddItem(item: ConfigItem<*>) {
         // Ensure the key of the item is unique
         val duplicateKeyEntry = configItems.asSequence().find { it.key == item.key }
         if (duplicateKeyEntry != null) {
@@ -161,9 +155,10 @@ open class Config(
      * Private function for resolving a type adapter for a given type
      */
     @Suppress("UNCHECKED_CAST")
-    inline fun <reified T: Any> resolveAdapterForType(): TypeAdapter<T> =
+    @PublishedApi
+    internal inline fun <reified T: Any> resolveAdapterForType(): TypeAdapter<T> =
         configTypeAdapters.firstOrNull { it.clazz == T::class } as? TypeAdapter<T>
-            ?: throw IllegalArgumentException("Type argument ${T::class.simpleName} is not supported by the configuration library. Have you added a TypeAdapter for this type?")
+            ?: throw IllegalArgumentException("Type argument ${T::class} is not supported by the configuration library.")
 
 
     inner class SubConfigApi(

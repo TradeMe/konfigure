@@ -1,6 +1,5 @@
 package nz.co.trademe.konfigure.model
 
-
 /**
  * Event model emitted when a config item is changed
  */
