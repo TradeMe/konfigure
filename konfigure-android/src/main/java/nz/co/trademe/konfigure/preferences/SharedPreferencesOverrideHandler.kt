@@ -28,11 +28,4 @@ class SharedPreferencesOverrideHandler(context: Context): OverrideHandler {
     override val all: Map<String, String>
         get() = preferences.all.mapValues { it.value.toString() }
 
-    override fun contains(key: String): Boolean {
-        return preferences.contains(key)
-    }
-
-    override fun get(key: String): String {
-        return preferences.getString(key, null) ?: throw NoSuchElementException("No preference found for $key")
-    }
 }

@@ -23,13 +23,4 @@ internal class InMemoryOverrideHandler: OverrideHandler {
     override val all: Map<String, String>
         get() = backingMap
 
-    override fun contains(key: String): Boolean {
-        return backingMap.contains(key)
-    }
-
-    override fun get(key: String): String {
-        return backingMap.getOrElse(key) {
-            throw NoSuchElementException("No value found in overrides for key: $key")
-        }
-    }
 }

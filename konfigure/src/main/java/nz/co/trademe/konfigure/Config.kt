@@ -4,6 +4,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import nz.co.trademe.konfigure.api.ConfigDelegate
+import nz.co.trademe.konfigure.api.ConfigRegistry
 import nz.co.trademe.konfigure.api.ConfigSource
 import nz.co.trademe.konfigure.api.OverrideHandler
 import nz.co.trademe.konfigure.internal.InMemoryOverrideHandler
@@ -35,7 +36,7 @@ open class Config(
      * List of all modified config items binded to this config instance
      */
     val modifiedItems: List<ConfigItem<*>>
-        get() = configItems.filter { overrideHandler.contains(it.key) }
+        get() = configItems.filter { overrideHandler.all.contains(it.key) }
 
     /**
      * Boolean property describing if there are any local overrides present
@@ -75,21 +76,20 @@ open class Config(
         }
     }
 
-
     /**
      * Function for getting the value of an item - implements fallback logic
      */
     inline fun <reified T : Any> getValueOf(item: ConfigItem<T>): T {
         val mapper = resolveAdapterForType<T>()
 
-        if (overrideHandler.contains(item.key)) {
-            return overrideHandler.get(item.key).let(mapper.fromString)
-        }
+        val overriddenValue = overrideHandler.all[item.key]?.let(mapper.fromString)
 
-        return configSources
-            .find { it.contains(item.key) }
-            ?.get(item.key)
-            ?.let(mapper.fromString) ?: item.defaultValue
+        val configSourceValue = configSources
+            .mapNotNull { it.all[item.key] }
+            .firstOrNull()
+            ?.let(mapper.fromString)
+
+        return overriddenValue ?: configSourceValue ?: item.defaultValue
     }
 
     /**
@@ -107,11 +107,12 @@ open class Config(
         // Emit change
         changeRelay.offer(
             ConfigChangeEvent(
-            key = item.key,
-            oldValue = oldValue,
-            newValue = newValue,
-            metadata = item.metadata
-        ))
+                key = item.key,
+                oldValue = oldValue,
+                newValue = newValue,
+                metadata = item.metadata
+            )
+        )
     }
 
     /**
@@ -156,21 +157,20 @@ open class Config(
      */
     @Suppress("UNCHECKED_CAST")
     @PublishedApi
-    internal inline fun <reified T: Any> resolveAdapterForType(): TypeAdapter<T> =
+    internal inline fun <reified T : Any> resolveAdapterForType(): TypeAdapter<T> =
         configTypeAdapters.firstOrNull { it.clazz == T::class } as? TypeAdapter<T>
             ?: throw IllegalArgumentException("Type argument ${T::class} is not supported by the configuration library.")
-
 
     inner class SubConfigApi(
         val updateConfig: (ConfigItem<*>) -> Unit
     ) {
-        inline fun <reified T: Any> provideDelegate(configItem: ConfigItem<T>): ConfigDelegate<T> = getDelegate(configItem)
+        inline fun <reified T : Any> provideDelegate(configItem: ConfigItem<T>): ConfigDelegate<T> = getDelegate(configItem)
     }
 
     /**
      * Type adapter definition used mapping types from [T] to [String] synchronously
      */
-    data class TypeAdapter<T: Any>(
+    data class TypeAdapter<T : Any>(
         val clazz: KClass<T>,
         val toString: (T) -> String,
         val fromString: (String) -> T
