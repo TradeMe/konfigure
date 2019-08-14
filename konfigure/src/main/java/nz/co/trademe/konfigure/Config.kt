@@ -10,19 +10,15 @@ import nz.co.trademe.konfigure.api.OverrideHandler
 import nz.co.trademe.konfigure.internal.InMemoryOverrideHandler
 import nz.co.trademe.konfigure.model.ConfigChangeEvent
 import nz.co.trademe.konfigure.model.ConfigItem
-import nz.co.trademe.konfigure.model.ConfigMetadata
-import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 
 open class Config(
-    @PublishedApi
-    internal val configSources: List<ConfigSource>,
-    @PublishedApi
-    internal val overrideHandler: OverrideHandler = InMemoryOverrideHandler()
-) {
+    private val configSources: List<ConfigSource>,
+    private val overrideHandler: OverrideHandler = InMemoryOverrideHandler()
+): ConfigRegistry {
 
-    @PublishedApi
-    internal val changeRelay = Channel<ConfigChangeEvent<*>>(capacity = Channel.UNLIMITED)
+    private val changeRelay = Channel<ConfigChangeEvent<*>>(capacity = Channel.UNLIMITED)
+
     val changes: Flow<ConfigChangeEvent<*>> = flow {
         for (event in changeRelay) emit(event)
     }
@@ -44,13 +40,48 @@ open class Config(
     val hasLocalOverrides: Boolean
         get() = overrideHandler.all.isNotEmpty()
 
-    @PublishedApi
-    internal val configTypeAdapters: Set<TypeAdapter<*>> = DEFAULT_TYPE_ADAPTERS
+    override fun <T : Any> registerItem(item: ConfigItem<T>, itemClass: KClass<T>): ConfigDelegate<T> {
+        validateAndAddItem(item)
+        return ConfigDelegate(item, itemClass)
+    }
+
+    override fun <T : Any> getValueOf(item: ConfigItem<T>, itemClass: KClass<T>): T {
+        val mapper = resolveAdapterForClass(itemClass)
+
+        val overriddenValue = overrideHandler.all[item.key]?.let(mapper.fromString)
+
+        val configSourceValue = configSources
+            .mapNotNull { it.all[item.key] }
+            .firstOrNull()
+            ?.let(mapper.fromString)
+
+        return overriddenValue ?: configSourceValue ?: item.defaultValue
+    }
+
+    override fun <T : Any> setValueOf(item: ConfigItem<T>, itemClass: KClass<T>, newValue: T) {
+        // Store old value
+        val oldValue: T = getValueOf(item, itemClass)
+
+        val mapper = resolveAdapterForClass(itemClass)
+
+        // Override value
+        overrideHandler.set(item.key, newValue.let(mapper.toString))
+
+        // Emit change
+        changeRelay.offer(
+            ConfigChangeEvent(
+                key = item.key,
+                oldValue = oldValue,
+                newValue = newValue,
+                metadata = item.metadata
+            )
+        )
+    }
 
     /**
      * Function for clearing local overrides, if an override handler is specified
      */
-    fun clearLocalOverrides() {
+    fun clearOverrides() {
         // Collate all changes
         val changeEvents = overrideHandler.all
             .map { entry ->
@@ -76,73 +107,7 @@ open class Config(
         }
     }
 
-    /**
-     * Function for getting the value of an item - implements fallback logic
-     */
-    inline fun <reified T : Any> getValueOf(item: ConfigItem<T>): T {
-        val mapper = resolveAdapterForType<T>()
-
-        val overriddenValue = overrideHandler.all[item.key]?.let(mapper.fromString)
-
-        val configSourceValue = configSources
-            .mapNotNull { it.all[item.key] }
-            .firstOrNull()
-            ?.let(mapper.fromString)
-
-        return overriddenValue ?: configSourceValue ?: item.defaultValue
-    }
-
-    /**
-     * Function for setting the value of an item.
-     */
-    inline fun <reified T : Any> setValueOf(item: ConfigItem<T>, newValue: T) {
-        // Store old value
-        val oldValue: T = getValueOf(item)
-
-        val mapper = resolveAdapterForType<T>()
-
-        // Override value
-        overrideHandler.set(item.key, newValue.let(mapper.toString))
-
-        // Emit change
-        changeRelay.offer(
-            ConfigChangeEvent(
-                key = item.key,
-                oldValue = oldValue,
-                newValue = newValue,
-                metadata = item.metadata
-            )
-        )
-    }
-
-    /**
-     * Main function to be used by extending classes to define various config parameters
-     */
-    @Suppress("MemberVisibilityCanBePrivate")
-    inline fun <reified T : Any> config(
-        key: String,
-        defaultValue: T,
-        metadata: ConfigMetadata
-    ): ReadWriteProperty<Any, T> {
-        val configItem = ConfigItem(key, defaultValue, metadata)
-        validateAndAddItem(configItem)
-        return getDelegate(configItem)
-    }
-
-    /**
-     * Function for provision of a typed delegate
-     */
-    @PublishedApi
-    internal inline fun <reified T : Any> getDelegate(configItem: ConfigItem<T>) =
-        ConfigDelegate(setValue = ::setValueOf, getValue = ::getValueOf, configItem = configItem)
-
-    /**
-     * Function which performs key validation when an item is added to the config items. All keys _must_
-     * be unique, else it becomes ambiguous which type the return should be when retrieving values
-     * from various config sources.
-     */
-    @PublishedApi
-    internal fun validateAndAddItem(item: ConfigItem<*>) {
+    private fun validateAndAddItem(item: ConfigItem<*>) {
         // Ensure the key of the item is unique
         val duplicateKeyEntry = configItems.asSequence().find { it.key == item.key }
         if (duplicateKeyEntry != null) {
@@ -152,20 +117,10 @@ open class Config(
         (configItems as MutableList).add(item)
     }
 
-    /**
-     * Private function for resolving a type adapter for a given type
-     */
     @Suppress("UNCHECKED_CAST")
-    @PublishedApi
-    internal inline fun <reified T : Any> resolveAdapterForType(): TypeAdapter<T> =
-        configTypeAdapters.firstOrNull { it.clazz == T::class } as? TypeAdapter<T>
-            ?: throw IllegalArgumentException("Type argument ${T::class} is not supported by the configuration library.")
-
-    inner class SubConfigApi(
-        val updateConfig: (ConfigItem<*>) -> Unit
-    ) {
-        inline fun <reified T : Any> provideDelegate(configItem: ConfigItem<T>): ConfigDelegate<T> = getDelegate(configItem)
-    }
+    private fun <T: Any> resolveAdapterForClass(clazz: KClass<T>): TypeAdapter<T> =
+        DEFAULT_TYPE_ADAPTERS.firstOrNull { it.clazz == clazz } as? TypeAdapter<T>
+            ?: throw NoSuchElementException("Type argument $clazz is not supported by konfigure.")
 
     /**
      * Type adapter definition used mapping types from [T] to [String] synchronously

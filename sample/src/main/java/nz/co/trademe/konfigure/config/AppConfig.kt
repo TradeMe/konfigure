@@ -14,15 +14,8 @@ class AppConfig(context: Context): Config(
         key = "testString",
         defaultValue = "This is a test config value",
         title = "Test String",
-        description = "This is a test string",
-        group = "Demo"
+        description = "This is a test string"
     )
 
-    var test2: Boolean by config(
-        key = "testBool",
-        defaultValue = false,
-        title = "Test Boolean",
-        description = "This is a test boolean",
-        group = "Demo"
-    )
+    val testSubConfig = TestSubConfig(parent = this)
 }

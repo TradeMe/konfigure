@@ -107,19 +107,19 @@ internal class ConfigPresenter(
         when (defaultValue) {
             is Long -> ConfigAdapterModel.LongConfig(
                 item = this as ConfigItem<Long>,
-                value = config.getValueOf(this),
+                value = config.getValueOf(this, Long::class),
                 isModified = config.modifiedItems.contains(this),
                 metadata = metadata as DisplayMetadata
             )
             is Boolean -> ConfigAdapterModel.BooleanConfig(
                 item = this as ConfigItem<Boolean>,
-                value = config.getValueOf(this),
+                value = config.getValueOf(this, Boolean::class),
                 isModified = config.modifiedItems.contains(this),
                 metadata = metadata as DisplayMetadata
             )
             is String -> ConfigAdapterModel.StringConfig(
                 item = this as ConfigItem<String>,
-                value = config.getValueOf(this),
+                value = config.getValueOf(this, String::class),
                 isModified = config.modifiedItems.contains(this),
                 metadata = metadata as DisplayMetadata
             )

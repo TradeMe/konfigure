@@ -23,7 +23,7 @@ internal class BooleanConfigViewHolder(
         valueSwitch.setOnCheckedChangeListener(null)
         valueSwitch.isChecked = model.value
         valueSwitch.setOnCheckedChangeListener { _, newValue ->
-            itemView.context.applicationConfig.setValueOf(model.item, newValue)
+            itemView.context.applicationConfig.setValueOf(model.item, Boolean::class, newValue)
         }
     }
 }

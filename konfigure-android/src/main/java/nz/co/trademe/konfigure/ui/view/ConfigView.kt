@@ -25,7 +25,7 @@ class ConfigView @JvmOverloads constructor(
     init {
         // Setup RecyclerView
         adapter = ConfigAdapter(
-            resetAllCallback = { context.applicationConfig.clearLocalOverrides() })
+            resetAllCallback = { context.applicationConfig.clearOverrides() })
 
         layoutManager = LinearLayoutManager(context, VERTICAL, false)
     }

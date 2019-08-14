@@ -1,20 +1,13 @@
 package nz.co.trademe.konfigure
 
-import nz.co.trademe.konfigure.model.ConfigItem
-import nz.co.trademe.konfigure.model.ConfigMetadata
-import kotlin.properties.ReadWriteProperty
+import nz.co.trademe.konfigure.api.ConfigRegistry
 
-abstract class SubConfig(protected val configApi: Config.SubConfigApi) {
+/**
+ * This class represents a subset of the overall list of  [Config]
+ */
+abstract class SubConfig(
+    override val parent: ConfigRegistry
+) : ConfigRegistry by parent {
 
-    /**
-     * Main function to be used by extending classes to define various config parameters.
-     */
-    protected inline fun <reified T : Any> config(
-        key: String,
-        defaultValue: T,
-        metadata: ConfigMetadata): ReadWriteProperty<Any, T> {
-        val configItem = ConfigItem(key, defaultValue, metadata)
-        configApi.updateConfig(configItem)
-        return configApi.provideDelegate(configItem)
-    }
+    abstract override val group: String?
 }

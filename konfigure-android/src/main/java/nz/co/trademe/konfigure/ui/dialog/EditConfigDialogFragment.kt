@@ -105,9 +105,9 @@ internal class EditConfigDialogFragment : DialogFragment() {
         @Suppress("UNCHECKED_CAST")
         when (editType) {
             EditConfigType.STRING ->
-                contentView.context.applicationConfig.setValueOf(configItem as ConfigItem<String>, configValue)
+                contentView.context.applicationConfig.setValueOf(configItem as ConfigItem<String>, String::class, configValue)
             EditConfigType.NUMBER ->
-                contentView.context.applicationConfig.setValueOf(configItem as ConfigItem<Long>, configValue.toLong())
+                contentView.context.applicationConfig.setValueOf(configItem as ConfigItem<Long>, Long::class, configValue.toLong())
         }
 
         // Dismiss the dialog.

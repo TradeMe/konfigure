@@ -1,8 +1,9 @@
 package nz.co.trademe.konfigure.util
 
 import nz.co.trademe.konfigure.Config
+import nz.co.trademe.konfigure.api.ConfigDelegate
+import nz.co.trademe.konfigure.extensions.config
 import nz.co.trademe.konfigure.ui.DisplayMetadata
-import kotlin.properties.ReadWriteProperty
 
 /**
  * Custom metadata which expands on what's required to display and adds a flag around requiring restarts.
@@ -21,7 +22,7 @@ inline fun <reified T: Any> Config.config(
     key: String,
     defaultValue: T,
     requiresRestart: Boolean = false
-): ReadWriteProperty<Any, T> = config(
+): ConfigDelegate<T> = config(
     key = key,
     defaultValue = defaultValue,
     metadata = object: RestartMetadata {
