@@ -4,6 +4,7 @@ buildscript {
     repositories {
         mavenCentral()
         google()
+        jcenter()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$versions.androidgradleplugin"
@@ -19,5 +20,5 @@ dependencies {
     api project(":konfigure")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
-    implementation "com.google.firebase:firebase-config:18.0.0"
+    implementation "com.google.firebase:firebase-config:19.0.0"
 }
