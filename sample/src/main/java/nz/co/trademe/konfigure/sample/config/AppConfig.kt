@@ -18,4 +18,6 @@ class AppConfig(context: Context): Config(
     )
 
     val testSubConfig = TestSubConfig(parent = this)
+
+    val restartableSubconfig = RestartableSubconfig(parent = this)
 }

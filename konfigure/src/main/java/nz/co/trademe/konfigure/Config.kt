@@ -1,6 +1,8 @@
 package nz.co.trademe.konfigure
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.broadcast
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import nz.co.trademe.konfigure.api.ConfigDelegate
@@ -17,10 +19,12 @@ open class Config(
     private val overrideHandler: OverrideHandler = InMemoryOverrideHandler()
 ): ConfigRegistry {
 
-    private val changeRelay = Channel<ConfigChangeEvent<*>>(capacity = Channel.UNLIMITED)
+    private val changeRelay = Channel<ConfigChangeEvent<*>>()
+        .broadcast(capacity = Channel.CONFLATED)
 
-    val changes: Flow<ConfigChangeEvent<*>> = flow {
-        for (event in changeRelay) emit(event)
+    @ExperimentalCoroutinesApi
+    val changes: Flow<ConfigChangeEvent<*>> get() = flow {
+        for (event in changeRelay.openSubscription()) emit(event)
     }
 
     /**

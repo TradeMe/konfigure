@@ -1,5 +1,6 @@
 package nz.co.trademe.konfigure.sample.examples.restart
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import nz.co.trademe.konfigure.sample.examples.Example
 
@@ -13,6 +14,6 @@ object RestartExample: Example {
         """.trimIndent()
 
     override fun onClick(activity: AppCompatActivity) {
-
+        activity.startActivity(Intent(activity, ConfigRestartActivity::class.java))
     }
 }

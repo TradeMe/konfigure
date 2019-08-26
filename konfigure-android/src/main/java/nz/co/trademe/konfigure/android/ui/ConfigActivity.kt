@@ -10,7 +10,7 @@ import androidx.appcompat.widget.SearchView
 import kotlinx.android.synthetic.main.activity_config.*
 import nz.co.trademe.konfigure.android.R
 
-class ConfigActivity: AppCompatActivity() {
+open class ConfigActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

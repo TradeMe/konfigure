@@ -1,6 +1,10 @@
 package nz.co.trademe.konfigure.sample.examples.restart
 
 import nz.co.trademe.konfigure.android.ui.DisplayMetadata
+import nz.co.trademe.konfigure.api.ConfigDelegate
+import nz.co.trademe.konfigure.api.ConfigRegistry
+import nz.co.trademe.konfigure.extensions.config
+import nz.co.trademe.konfigure.extensions.qualifiedGroup
 
 /**
  * Custom metadata which expands on what's required to display and adds a flag around requiring restarts.
@@ -11,3 +15,19 @@ interface RestartMetadata : DisplayMetadata {
     override val description: String
     override val group: String
 }
+
+inline fun <reified T : Any> ConfigRegistry.config(
+    key: String,
+    defaultValue: T,
+    title: String,
+    description: String,
+    requiresRestart: Boolean = false): ConfigDelegate<T> = config(
+    key = key,
+    defaultValue = defaultValue,
+    metadata = object: RestartMetadata {
+        override val requiresRestart: Boolean = requiresRestart
+        override val title: String = title
+        override val description: String = description
+        override val group: String = qualifiedGroup ?: ""
+    }
+)
