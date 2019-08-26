@@ -4,9 +4,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import nz.co.trademe.konfigure.Config
 import nz.co.trademe.konfigure.android.ui.DisplayMetadata
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
@@ -15,9 +17,9 @@ import nz.co.trademe.konfigure.model.ConfigItem
 internal class ConfigPresenter(
     private val config: Config,
     private val filters: Set<ConfigView.Filter>,
-    private val onModelsChanges: (List<ConfigAdapterModel>) -> Unit,
+    private val onModelsChanges: (models: List<ConfigAdapterModel>) -> Unit,
     private val parentJob: Job = Job()
-): CoroutineScope by GlobalScope + Dispatchers.Main + parentJob {
+) : CoroutineScope by GlobalScope + Dispatchers.IO + parentJob {
 
     private var searchTerm: String = ""
 
@@ -30,23 +32,44 @@ internal class ConfigPresenter(
         }
     }
 
+    /**
+     * Perform a search on the config items given a search string. This does the search on an IO dispatcher, and posts results to the main thread.
+     *
+     * @param searchString The string to search using.
+     */
     fun search(searchString: String) {
-        this.searchTerm = searchString
-        val allItems = performSearchOnModifiedItems(searchString) + performSearchOnAllItems(searchString)
-        onModelsChanges(allItems)
+        launch {
+            // Search modified items and map to models
+            val modifiedItems = config.modifiedItems
+                .search(searchString)
+                .mapModifiedSectionAdapterModels()
+
+            // Search all items and map to models
+            val allItems = config.configItems
+                .search(searchString)
+                .mapToAdapterModels()
+
+            // Switch scope to emit results
+            withContext(Dispatchers.Main) {
+                this@ConfigPresenter.searchTerm = searchString
+                onModelsChanges(modifiedItems + allItems)
+            }
+        }
     }
 
     fun destroy() {
         parentJob.cancel()
     }
 
-    private fun performSearchOnAllItems(searchString: String): List<ConfigAdapterModel> {
-        var topDividerSkipped = false
-
-        return config.configItems
-            .asSequence()
-            // Filter any items via the custom filters supplied, if any
-            .filter { item ->
+    /**
+     * This function performs a search on the receiving list. It applies any given filter to each item, then filters items based off the [filterBy] function.
+     * All searching is performed on the dispatcher used by the parent scope.
+     *
+     * @receiver The list to filter
+     * @return The filtered list
+     */
+    private suspend fun List<ConfigItem<*>>.search(searchString: String): List<ConfigItem<*>> = coroutineScope {
+        return@coroutineScope filter { item ->
                 filters
                     .map { it.shouldKeepItem(item) }
                     .ifEmpty { listOf(true) }
@@ -56,12 +79,25 @@ internal class ConfigPresenter(
                 // Perform the search
                 searchString.isEmpty() || it.filterBy(searchString)
             }
-            .groupBy { (it.metadata as? DisplayMetadata)?.group }
+    }
+
+    /**
+     * This function maps a list of [ConfigItem]s into a list of [ConfigAdapterModel] for display. It does so by grouping elements based on [DisplayMetadata] applied to each config item.
+     * All mapping is performed on the dispatcher used by the parent scope.
+     *
+     * @receiver The list to map
+     * @return The adapter models to display
+     */
+    private suspend fun List<ConfigItem<*>>.mapToAdapterModels(): List<ConfigAdapterModel> = coroutineScope {
+        var topDividerSkipped = false
+
+        return@coroutineScope groupBy { (it.metadata as? DisplayMetadata)?.group }
             .flatMap { (group, items) ->
                 // Construct grouped items
                 listOfNotNull(
                     group?.let { ConfigAdapterModel.GroupHeader(group) },
-                    *items.mapToModel())
+                    *items.mapToModel()
+                )
                     .toMutableList()
                     .apply {
                         // Add divider before header if not the top
@@ -74,13 +110,15 @@ internal class ConfigPresenter(
             }
     }
 
-    private fun performSearchOnModifiedItems(searchString: String): List<ConfigAdapterModel> {
-        return config.modifiedItems
-            .filter {
-                // Perform the search
-                searchString.isEmpty() || it.filterBy(searchString)
-            }
-            .mapToModel()
+    /**
+     * This function maps a list of [ConfigItem]s into a list of [ConfigAdapterModel] for display. It does so by grouping all elements together, then applying an overrides header and reset footer.
+     * All mapping is performed on the dispatcher used by the parent scope.
+     *
+     * @receiver The list to map
+     * @return The adapter models to display
+     */
+    private suspend fun List<ConfigItem<*>>.mapModifiedSectionAdapterModels(): List<ConfigAdapterModel> = coroutineScope {
+        return@coroutineScope mapToModel()
             .run {
                 if (isNotEmpty()) {
                     listOf(
@@ -94,6 +132,9 @@ internal class ConfigPresenter(
             }
     }
 
+    /**
+     * Simple function for determining whether or not the receiving [ConfigItem] should be filtered, i.e kept.
+     */
     private fun ConfigItem<*>.filterBy(searchString: String): Boolean {
         // Return early if the metadata isn't the correct type
         val metadata = metadata as? DisplayMetadata ?: return false
