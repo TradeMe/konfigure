@@ -16,12 +16,13 @@ import nz.co.trademe.konfigure.model.ConfigItem
 
 internal class ConfigPresenter(
     private val config: Config,
-    private val filters: Set<ConfigView.Filter>,
     private val onModelsChanges: (models: List<ConfigAdapterModel>) -> Unit,
     private val parentJob: Job = Job()
 ) : CoroutineScope by GlobalScope + Dispatchers.IO + parentJob {
 
     private var searchTerm: String = ""
+
+    val filters = mutableSetOf<ConfigView.Filter>()
 
     init {
         search(searchTerm)

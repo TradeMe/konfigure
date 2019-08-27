@@ -11,7 +11,13 @@ import nz.co.trademe.konfigure.extensions.qualifiedGroup
 
 /**
  * Published extension function for simplifying the use of display metadata. Note, any consumer could implement similar extension
- * functions to ease use of config metadata.
+ * functions to ease use of [DisplayMetadata].
+ *
+ * @param group The group to assign this config item to
+ * @param title The title to display in the override UI
+ * @param description The description to display in the override UI
+ * @param key The Config Key
+ * @param defaultValue The default value of this config item
  */
 inline fun <reified T: Any> ConfigRegistry.config(
     group: String = qualifiedGroup ?: "Ungrouped",
@@ -30,7 +36,7 @@ inline fun <reified T: Any> ConfigRegistry.config(
 )
 
 /**
- * Extension value for getting this applications config instance from the Application context
+ * Extension property for getting this applications config instance from the Application context
  */
 val Context.applicationConfig: Config
     get() = (this.applicationContext as? ConfigProvider)?.config

@@ -8,7 +8,7 @@ import nz.co.trademe.konfigure.Config
 interface ConfigProvider {
 
     /**
-     * The config instance used to render the UI
+     * The config instance used by the application. This is used by the UI.
      */
     val config: Config
 

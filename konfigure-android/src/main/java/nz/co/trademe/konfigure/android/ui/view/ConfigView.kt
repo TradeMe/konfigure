@@ -18,9 +18,7 @@ class ConfigView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
-    private val filters = arrayListOf<Filter>()
-
-    private lateinit var presenter: ConfigPresenter
+    private var presenter: ConfigPresenter? = null
 
     init {
         // Setup RecyclerView
@@ -34,23 +32,22 @@ class ConfigView @JvmOverloads constructor(
         super.onAttachedToWindow()
         presenter = ConfigPresenter(
             config = context.applicationConfig,
-            filters = filters.toSet(),
             onModelsChanges = ::onNewModels
         )
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        presenter.destroy()
+        presenter?.destroy()
     }
 
 
     fun addFilter(filter: Filter) {
-        filters.add(filter)
+        presenter?.filters?.add(filter)
     }
 
     fun search(searchTerm: String) {
-        presenter.search(searchString = searchTerm)
+        presenter?.search(searchString = searchTerm)
     }
 
     private fun onNewModels(models: List<ConfigAdapterModel>) {
