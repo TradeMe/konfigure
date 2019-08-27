@@ -6,3 +6,9 @@
 /build
 /captures
 .externalNativeBuild
+
+**.classpath
+**.project
+**.settings/
+
+**bin/
