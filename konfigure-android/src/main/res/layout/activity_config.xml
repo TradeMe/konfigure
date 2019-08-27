@@ -35,7 +35,7 @@
             android:text="@string/no_results_found" />
     </LinearLayout>
 
-    <nz.co.trademe.konfigure.ui.view.ConfigView
+    <nz.co.trademe.konfigure.android.ui.view.ConfigView
         android:id="@+id/configView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

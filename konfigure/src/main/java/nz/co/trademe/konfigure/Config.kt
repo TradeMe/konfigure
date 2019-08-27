@@ -1,6 +1,8 @@
 package nz.co.trademe.konfigure
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.broadcast
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import nz.co.trademe.konfigure.api.ConfigDelegate
@@ -12,15 +14,47 @@ import nz.co.trademe.konfigure.model.ConfigChangeEvent
 import nz.co.trademe.konfigure.model.ConfigItem
 import kotlin.reflect.KClass
 
+/**
+ * The main class for handling Config registration. This validates key uniqueness, registers items,
+ * and provides the property delegates which handle value lookup.
+ *
+ * To use Konfigure, you must first create a class which extends from [Config], and provides implementations
+ * for [ConfigSource]s, as well as optionally an [OverrideHandler]. If an [OverrideHandler] isn't provided,
+ * overridden values will be persisted in memory, at the same scope as your [Config] instance.
+ *
+ * Example of usage:
+ *
+ * ```
+ * class ApplicationConfig: Config(
+ *     configSources = listOf(RemoteSource()),
+ *     overrideHandler = PersistentOverrideHandler()
+ * ) {
+ *
+ *     // Register a top-level config item
+ *     val testConfig: String by config(
+ *         key = "test_config",
+ *         defaultValue = "default")
+ *
+ *     // Register a subconfig group
+ *     val subconfig = GroupedSubconfig(parent = this)
+ * }
+ * ```
+ *
+ * @param configSources The config sources to draw values from, with priority given to sources closest to the start of the list.
+ * @param overrideHandler The override handler to store overridden values.
+ *
+ */
 open class Config(
     private val configSources: List<ConfigSource>,
     private val overrideHandler: OverrideHandler = InMemoryOverrideHandler()
 ): ConfigRegistry {
 
-    private val changeRelay = Channel<ConfigChangeEvent<*>>(capacity = Channel.UNLIMITED)
+    private val changeRelay = Channel<ConfigChangeEvent<*>>()
+        .broadcast(capacity = Channel.CONFLATED)
 
-    val changes: Flow<ConfigChangeEvent<*>> = flow {
-        for (event in changeRelay) emit(event)
+    @ExperimentalCoroutinesApi
+    val changes: Flow<ConfigChangeEvent<*>> get() = flow {
+        for (event in changeRelay.openSubscription()) emit(event)
     }
 
     /**
@@ -110,8 +144,9 @@ open class Config(
     private fun validateAndAddItem(item: ConfigItem<*>) {
         // Ensure the key of the item is unique
         val duplicateKeyEntry = configItems.asSequence().find { it.key == item.key }
-        if (duplicateKeyEntry != null) {
-            throw IllegalStateException("The key \"${item.key}\" already in use by item with metadata \"${duplicateKeyEntry.metadata}\" - please choose another.")
+
+        check(duplicateKeyEntry == null) {
+            "The key \"${item.key}\" already in use by item with metadata \"${duplicateKeyEntry?.metadata}\" - please choose another."
         }
 
         (configItems as MutableList).add(item)
@@ -125,7 +160,7 @@ open class Config(
     /**
      * Type adapter definition used mapping types from [T] to [String] synchronously
      */
-    data class TypeAdapter<T : Any>(
+    internal data class TypeAdapter<T : Any>(
         val clazz: KClass<T>,
         val toString: (T) -> String,
         val fromString: (String) -> T

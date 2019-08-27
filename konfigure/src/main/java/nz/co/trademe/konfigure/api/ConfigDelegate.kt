@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
 /**
- * Delegate used for handling config gets and sets
+ * Delegate used for handling config gets and sets. This is effectively internal.
  */
 class ConfigDelegate<T: Any>(
     private val item: ConfigItem<T>,

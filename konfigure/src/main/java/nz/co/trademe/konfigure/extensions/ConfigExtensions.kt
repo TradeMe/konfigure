@@ -19,7 +19,7 @@ val ConfigRegistry.qualifiedGroup: String?
 inline fun <reified T : Any> ConfigRegistry.config(
     key: String,
     defaultValue: T,
-    metadata: ConfigMetadata): ConfigDelegate<T> {
+    metadata: ConfigMetadata = object: ConfigMetadata {}): ConfigDelegate<T> {
     val configItem = ConfigItem(key, defaultValue, metadata)
     return registerItem(configItem, T::class)
 }
