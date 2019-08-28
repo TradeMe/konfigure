@@ -1,0 +1,9 @@
+<manifest package="nz.co.trademe.konfigure.android"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".ui.ConfigActivity"
+            android:theme="@style/Theme.Config.NoActionBar" />
+    </application>
+</manifest>

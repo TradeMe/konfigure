@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="long_current_value_format">Current value: %d</string>
+    <string name="string_current_value_format">Current value: %s</string>
+    <string name="config">Config</string>
+    <string name="search">Search</string>
+    <string name="no_results_found">No results found</string>
+    <string name="edit_config">Edit config</string>
+    <string name="config_blank_error">The new config can\'t be blank</string>
+    <string name="reset_to_default">Reset to default</string>
+    <string name="reset_experiments_description">Reset all config values back to their default state</string>
+    <string name="configuration">Configuration</string>
+</resources>

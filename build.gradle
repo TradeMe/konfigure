@@ -1,0 +1,45 @@
+buildscript {
+    apply from: rootProject.file("versions.gradle")
+
+    repositories {
+        google()
+        jcenter()
+        
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:$versions.androidgradleplugin"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    apply from: rootProject.file("versions.gradle")
+
+    afterEvaluate {
+        // Common library module configurations
+        if (plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")) {
+            android.compileSdkVersion = versions.compileSdkVersion
+
+
+            android.defaultConfig {
+                minSdkVersion versions.minSdkVersion
+                targetSdkVersion versions.targetSdkVersion
+                vectorDrawables.useSupportLibrary = true
+            }
+
+            android.compileOptions {
+                sourceCompatibility JavaVersion.VERSION_1_8
+                targetCompatibility JavaVersion.VERSION_1_8
+            }
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
