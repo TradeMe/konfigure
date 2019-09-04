@@ -74,9 +74,15 @@ open class Config(
     val hasLocalOverrides: Boolean
         get() = overrideHandler.all.isNotEmpty()
 
-    override fun <T : Any> registerItem(item: ConfigItem<T>, itemClass: KClass<T>): ConfigDelegate<T> {
-        validateAndAddItem(item)
-        return ConfigDelegate(item, itemClass)
+    override fun <T: Any> registerItem(item: ConfigItem<T>) {
+        // Ensure the key of the item is unique
+        val duplicateKeyEntry = configItems.asSequence().find { it.key == item.key }
+
+        check(duplicateKeyEntry == null) {
+            "The key \"${item.key}\" already in use by item with metadata \"${duplicateKeyEntry?.metadata}\" - please choose another."
+        }
+
+        (configItems as MutableList).add(item)
     }
 
     override fun <T : Any> getValueOf(item: ConfigItem<T>, itemClass: KClass<T>): T {
@@ -139,17 +145,6 @@ open class Config(
         changeEvents.forEach {
             changeRelay.offer(it)
         }
-    }
-
-    private fun validateAndAddItem(item: ConfigItem<*>) {
-        // Ensure the key of the item is unique
-        val duplicateKeyEntry = configItems.asSequence().find { it.key == item.key }
-
-        check(duplicateKeyEntry == null) {
-            "The key \"${item.key}\" already in use by item with metadata \"${duplicateKeyEntry?.metadata}\" - please choose another."
-        }
-
-        (configItems as MutableList).add(item)
     }
 
     @Suppress("UNCHECKED_CAST")

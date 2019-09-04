@@ -17,6 +17,8 @@ class AppConfig(context: Context): Config(
         description = "This is a test string"
     )
 
+    var anotherOne: String by config()
+
     val testSubConfig = TestSubConfig(parent = this)
 
     val restartableSubconfig = RestartableSubconfig(parent = this)
