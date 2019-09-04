@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
@@ -28,8 +27,10 @@ internal class ConfigPresenter(
         search(searchTerm)
 
         launch {
-            config.changes
-                .collect { search(searchTerm) }
+            @Suppress("EXPERIMENTAL_API_USAGE")
+            for (change in config.changes.openSubscription()) {
+                search(searchTerm)
+            }
         }
     }
 
