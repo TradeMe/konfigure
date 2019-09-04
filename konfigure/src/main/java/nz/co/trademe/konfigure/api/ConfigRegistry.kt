@@ -16,7 +16,7 @@ interface ConfigRegistry {
     val group: String?
         get() = null
 
-    fun <T: Any> registerItem(item: ConfigItem<T>, itemClass: KClass<T>): ConfigDelegate<T>
+    fun <T: Any> registerItem(item: ConfigItem<T>)
 
     fun <T: Any> getValueOf(item: ConfigItem<T>, itemClass: KClass<T>): T
 
