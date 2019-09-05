@@ -1,4 +1,4 @@
-package nz.co.trademe.konfigure.sample.examples.restart
+package nz.co.trademe.konfigure.sample.examples.restart.util
 
 import android.app.AlarmManager
 import android.app.PendingIntent

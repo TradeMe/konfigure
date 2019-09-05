@@ -20,19 +20,17 @@ import nz.co.trademe.konfigure.api.ConfigRegistrar
  * @param defaultValue The default value of this config item
  */
 inline fun <reified T: Any> ConfigRegistry.config(
-    group: String = qualifiedGroup ?: "Ungrouped",
     title: String? = null,
     description: String? = null,
+    group: String? = null,
     key: String? = null,
     defaultValue: T? = null
 ): ConfigRegistrar<T> = config(
     key = key,
     defaultValue = defaultValue,
-    metadataProvider = { property -> object: DisplayMetadata {
-        override val title: String = title ?: property.name
-        override val group: String = group
-        override val description: String = description ?: "Applies changes to the ${property.name} property"
-    }}
+    metadataProvider = { property ->
+        DisplayMetadata.from(property, this@config, group, title, description)
+    }
 )
 
 /**

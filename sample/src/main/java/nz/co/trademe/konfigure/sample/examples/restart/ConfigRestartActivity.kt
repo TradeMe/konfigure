@@ -15,6 +15,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nz.co.trademe.konfigure.android.extensions.applicationConfig
 import nz.co.trademe.konfigure.android.ui.ConfigActivity
+import nz.co.trademe.konfigure.sample.examples.restart.config.RestartMetadata
+import nz.co.trademe.konfigure.sample.examples.restart.util.showRestartSnackbar
 
 /**
  * This activity demonstrates the additional [RestartMetadata.requiresRestart] property, which when

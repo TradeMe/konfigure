@@ -22,6 +22,9 @@ import nz.co.trademe.konfigure.android.ui.view.ConfigView
  */
 open class ConfigActivity: AppCompatActivity() {
 
+    val configurationView: ConfigView
+        get() = configView
+
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

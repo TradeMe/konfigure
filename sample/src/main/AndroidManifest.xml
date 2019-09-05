@@ -23,6 +23,10 @@
             android:name=".examples.restart.ConfigRestartActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
 
+        <activity
+            android:name=".examples.filtering.FilteredConfigActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+
     </application>
 
 </manifest>

@@ -1,8 +1,9 @@
-package nz.co.trademe.konfigure.sample.config
+package nz.co.trademe.konfigure.sample.config.subconfig
 
 import nz.co.trademe.konfigure.api.ConfigRegistry
 import nz.co.trademe.konfigure.SubConfig
 import nz.co.trademe.konfigure.android.extensions.config
+import nz.co.trademe.konfigure.sample.config.subconfig.MoreNestedSubconfig
 
 class TestSubConfig(parent: ConfigRegistry): SubConfig(parent) {
     override val group: String?

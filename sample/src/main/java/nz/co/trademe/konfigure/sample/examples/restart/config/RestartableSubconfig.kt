@@ -1,8 +1,7 @@
-package nz.co.trademe.konfigure.sample.config
+package nz.co.trademe.konfigure.sample.examples.restart.config
 
 import nz.co.trademe.konfigure.SubConfig
 import nz.co.trademe.konfigure.api.ConfigRegistry
-import nz.co.trademe.konfigure.sample.examples.restart.config
 
 private const val GROUP = "Requires restart"
 

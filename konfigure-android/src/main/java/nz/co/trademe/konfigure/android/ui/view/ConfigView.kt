@@ -4,6 +4,15 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import nz.co.trademe.konfigure.android.extensions.applicationConfig
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapter
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
@@ -16,9 +25,11 @@ class ConfigView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : RecyclerView(context, attrs, defStyleAttr) {
+) : RecyclerView(context, attrs, defStyleAttr), CoroutineScope by GlobalScope + Dispatchers.IO {
 
-    private var presenter: ConfigPresenter? = null
+    private val presenter: ConfigPresenter
+
+    private var modelObservationJob: Job = Job()
 
     init {
         // Setup RecyclerView
@@ -26,28 +37,36 @@ class ConfigView @JvmOverloads constructor(
             resetAllCallback = { context.applicationConfig.clearOverrides() })
 
         layoutManager = LinearLayoutManager(context, VERTICAL, false)
+
+        presenter = ConfigPresenter(
+            config = context.applicationConfig
+        )
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        presenter = ConfigPresenter(
-            config = context.applicationConfig,
-            onModelsChanges = ::onNewModels
-        )
+        launch(modelObservationJob) {
+            presenter.models.collect { models ->
+                withContext(Dispatchers.Main) {
+                    onNewModels(models)
+                }
+            }
+        }
+
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        presenter?.destroy()
+        modelObservationJob.cancelChildren()
     }
 
 
     fun addFilter(filter: Filter) {
-        presenter?.filters?.add(filter)
+        presenter.addFilter(filter)
     }
 
     fun search(searchTerm: String) {
-        presenter?.search(searchString = searchTerm)
+        presenter.search(searchString = searchTerm)
     }
 
     private fun onNewModels(models: List<ConfigAdapterModel>) {
