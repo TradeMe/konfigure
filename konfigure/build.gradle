@@ -1,5 +1,12 @@
 apply plugin: 'kotlin'
 
+apply from: '../common.gradle'
+apply from: '../publishing.gradle'
+
+ext {
+    name = "Konfigure"
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"

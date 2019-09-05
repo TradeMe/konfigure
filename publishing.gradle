@@ -1,0 +1,58 @@
+if (project.plugins.hasPlugin("com.android.library") || project.plugins.hasPlugin("kotlin")) {
+
+
+    if (project.plugins.hasPlugin("com.android.library")) {
+        apply plugin: 'digital.wup.android-maven-publish'
+
+        task sourcesJar(type: Jar) {
+            from android.sourceSets.main.java.source
+        }
+    } else {
+        apply plugin: 'maven-publish'
+
+        task sourcesJarKt(type: Jar) {
+            from kotlin.sourceSets.main.kotlin.srcDirs
+        }
+    }
+
+    publishing {
+        publications {
+            if (project.plugins.hasPlugin("kotlin")) {
+                maven(MavenPublication) {
+                    from project.components.java
+                    artifact project.sourcesJarKt {
+                        // not required, includes sourcesJar with correct classifier
+                        classifier "sources"
+                    }
+
+                    groupId project.ext.group
+                    artifactId project.name
+                    version project.ext.version
+                }
+            } else {
+                aar(MavenPublication) {
+                    from project.components.android
+                    artifact project.sourcesJar {
+                        // not required, includes sourcesJar with correct classifier
+                        classifier "sources"
+                    }
+                    groupId project.ext.group
+                    artifactId project.name
+                    version project.ext.version
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name 'Bintray'
+                url "https://api.bintray.com/maven/${project.org}/${project.repo}/${project.name}/;publish=1"
+
+                credentials {
+                    username BINTRAY_USERNAME
+                    password BINTRAY_API_KEY
+                }
+            }
+        }
+    }
+}

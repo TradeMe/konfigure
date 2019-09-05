@@ -1,0 +1,6 @@
+ext.version = "1.0.0"
+ext.group = "nz.co.trademe.konfigure"
+ext.repo = "Konfigure"
+ext.org = "trademe"
+ext.scm = 'https://github.com/TradeMe/konfigure.git'
+ext.description = 'An Application Configuration Library based on Kotlin Property Delegation'

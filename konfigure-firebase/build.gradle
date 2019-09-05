@@ -14,6 +14,13 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
+apply from: '../common.gradle'
+apply from: '../publishing.gradle'
+
+ext {
+    name = "Konfigure Firebase"
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 

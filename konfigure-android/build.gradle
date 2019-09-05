@@ -15,8 +15,15 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+apply from: '../common.gradle'
+apply from: '../publishing.gradle'
+
 androidExtensions {
     experimental = true
+}
+
+ext {
+    name = "Konfigure Android"
 }
 
 dependencies {
@@ -25,8 +32,8 @@ dependencies {
     api project(":konfigure")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0-RC'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0-RC'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0'
 
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.google.android.material:material:1.0.0'
