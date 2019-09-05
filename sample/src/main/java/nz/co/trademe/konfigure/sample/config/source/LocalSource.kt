@@ -1,4 +1,4 @@
-package nz.co.trademe.konfigure.sample.config
+package nz.co.trademe.konfigure.sample.config.source
 
 import nz.co.trademe.konfigure.api.ConfigSource
 

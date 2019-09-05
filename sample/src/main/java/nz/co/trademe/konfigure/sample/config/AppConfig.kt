@@ -4,6 +4,10 @@ import android.content.Context
 import nz.co.trademe.konfigure.Config
 import nz.co.trademe.konfigure.android.extensions.config
 import nz.co.trademe.konfigure.android.preferences.SharedPreferencesOverrideHandler
+import nz.co.trademe.konfigure.sample.config.source.LocalSource
+import nz.co.trademe.konfigure.sample.config.subconfig.TestSubConfig
+import nz.co.trademe.konfigure.sample.examples.filtering.config.UserVisibleSubConfig
+import nz.co.trademe.konfigure.sample.examples.restart.config.RestartableSubconfig
 
 class AppConfig(context: Context): Config(
     configSources = listOf(LocalSource),
@@ -26,4 +30,6 @@ class AppConfig(context: Context): Config(
     val testSubConfig = TestSubConfig(parent = this)
 
     val restartableSubconfig = RestartableSubconfig(parent = this)
+
+    val userVisibleSubConfig = UserVisibleSubConfig(parent = this)
 }

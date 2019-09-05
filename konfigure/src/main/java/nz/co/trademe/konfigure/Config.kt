@@ -1,6 +1,7 @@
 package nz.co.trademe.konfigure
 
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.broadcast
 import nz.co.trademe.konfigure.api.ConfigDelegate
 import nz.co.trademe.konfigure.api.ConfigRegistry
@@ -49,8 +50,8 @@ open class Config(
     /**
      * Config changes are modeled as a hot stream of [ConfigChangeEvent]s
      */
-    val changes = Channel<ConfigChangeEvent<*>>()
-        .broadcast(capacity = Channel.CONFLATED)
+    @Suppress("EXPERIMENTAL_API_USAGE")
+    val changes = ConflatedBroadcastChannel<ConfigChangeEvent<*>>()
 
     /**
      * List of all config items binded to this config instance

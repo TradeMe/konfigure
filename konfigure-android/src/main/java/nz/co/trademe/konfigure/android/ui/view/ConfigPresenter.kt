@@ -1,66 +1,95 @@
 package nz.co.trademe.konfigure.android.ui.view
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import nz.co.trademe.konfigure.Config
 import nz.co.trademe.konfigure.android.ui.DisplayMetadata
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
+import nz.co.trademe.konfigure.model.ConfigChangeEvent
 import nz.co.trademe.konfigure.model.ConfigItem
 
+private const val EMPTY_SEARCH_TERM = ""
+
+@Suppress("EXPERIMENTAL_API_USAGE")
 internal class ConfigPresenter(
-    private val config: Config,
-    private val onModelsChanges: (models: List<ConfigAdapterModel>) -> Unit,
-    private val parentJob: Job = Job()
-) : CoroutineScope by GlobalScope + Dispatchers.IO + parentJob {
+    private val config: Config
+) {
 
-    private var searchTerm: String = ""
+    private val filters = mutableSetOf<ConfigView.Filter>()
 
-    val filters = mutableSetOf<ConfigView.Filter>()
+    /**
+     * Property acting as a search term relay for triggering async searching
+     */
+    private val searchTermRelay = ConflatedBroadcastChannel(value = EMPTY_SEARCH_TERM)
 
-    init {
-        search(searchTerm)
+    /**
+     * Property for emitting config changes as a flow
+     */
+    private val changeNotifier: Flow<ConfigChangeEvent<*>?> = flow {
+        // Emit a dummy change to trigger the first combine callback
+        emit(null)
 
-        launch {
-            @Suppress("EXPERIMENTAL_API_USAGE")
-            for (change in config.changes.openSubscription()) {
-                search(searchTerm)
+        // Emit all config changes
+        emitAll(config.changes.openSubscription())
+    }
+
+    /**
+     * Property exposed to consumers for observing. This combines the config changes emitted by [Config.changes],
+     * and the search term relay. It then performs a search on the IO dispatcher and emits the results
+     */
+    val models: Flow<List<ConfigAdapterModel>> =
+        changeNotifier
+            .combine(searchTermRelay.asFlow()) { _, searchTerm ->
+                performSearch(searchTerm)
             }
+            .flowOn(Dispatchers.IO)
+
+    /**
+     * Adds a given filter to the internal list of filters and notifies the presenter to re-emit changes.
+     */
+    fun addFilter(filter: ConfigView.Filter) {
+        filters.add(filter)
+
+        // Rerun the last search
+        searchTermRelay.valueOrNull?.let {
+            searchTermRelay.offer(it)
         }
     }
 
     /**
-     * Perform a search on the config items given a search string. This does the search on an IO dispatcher, and posts results to the main thread.
+     * Perform a search on the config items given a search string.
      *
      * @param searchString The string to search using.
      */
     fun search(searchString: String) {
-        launch {
-            // Search modified items and map to models
-            val modifiedItems = config.modifiedItems
-                .search(searchString)
-                .mapModifiedSectionAdapterModels()
-
-            // Search all items and map to models
-            val allItems = config.configItems
-                .search(searchString)
-                .mapToAdapterModels()
-
-            // Switch scope to emit results
-            withContext(Dispatchers.Main) {
-                this@ConfigPresenter.searchTerm = searchString
-                onModelsChanges(modifiedItems + allItems)
-            }
-        }
+        searchTermRelay.offer(searchString)
     }
 
-    fun destroy() {
-        parentJob.cancel()
+    /**
+     * Perform a search on the config items given a search string. This does the search asynchronously, and returns the results
+     *
+     * @param searchString The string to search using.
+     * @return List of adapter models resulting from the search
+     */
+    private suspend fun performSearch(searchString: String): List<ConfigAdapterModel> = coroutineScope {
+        // Search modified items and map to models
+        val modifiedItems = config.modifiedItems
+            .search(searchString)
+            .mapModifiedSectionAdapterModels()
+
+        // Search all items and map to models
+        val allItems = config.configItems
+            .search(searchString)
+            .mapToAdapterModels()
+
+        return@coroutineScope modifiedItems + allItems
     }
 
     /**
@@ -72,11 +101,11 @@ internal class ConfigPresenter(
      */
     private suspend fun List<ConfigItem<*>>.search(searchString: String): List<ConfigItem<*>> = coroutineScope {
         return@coroutineScope filter { item ->
-                filters
-                    .map { it.shouldKeepItem(item) }
-                    .ifEmpty { listOf(true) }
-                    .reduce { acc, shouldFilter -> acc || shouldFilter }
-            }
+            filters
+                .map { it.shouldKeepItem(item) }
+                .ifEmpty { listOf(true) }
+                .reduce { acc, shouldFilter -> acc || shouldFilter }
+        }
             .filter {
                 // Perform the search
                 searchString.isEmpty() || it.filterBy(searchString)

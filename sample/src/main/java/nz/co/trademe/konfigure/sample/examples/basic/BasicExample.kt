@@ -1,6 +1,5 @@
 package nz.co.trademe.konfigure.sample.examples.basic
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import nz.co.trademe.konfigure.sample.examples.Example
 import nz.co.trademe.konfigure.android.ui.ConfigActivity
@@ -14,6 +13,6 @@ object BasicExample: Example {
         """.trimIndent()
 
     override fun onClick(activity: AppCompatActivity) {
-        activity.startActivity(Intent(activity, ConfigActivity::class.java))
+        ConfigActivity.start(activity)
     }
 }

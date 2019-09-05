@@ -1,4 +1,4 @@
-package nz.co.trademe.konfigure.sample.config
+package nz.co.trademe.konfigure.sample.config.subconfig
 
 import nz.co.trademe.konfigure.api.ConfigRegistry
 import nz.co.trademe.konfigure.SubConfig
