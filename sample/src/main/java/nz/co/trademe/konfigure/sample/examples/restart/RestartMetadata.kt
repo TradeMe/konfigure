@@ -1,10 +1,10 @@
 package nz.co.trademe.konfigure.sample.examples.restart
 
 import nz.co.trademe.konfigure.android.ui.DisplayMetadata
-import nz.co.trademe.konfigure.api.ConfigDelegate
 import nz.co.trademe.konfigure.api.ConfigRegistry
 import nz.co.trademe.konfigure.extensions.config
 import nz.co.trademe.konfigure.extensions.qualifiedGroup
+import nz.co.trademe.konfigure.api.ConfigRegistrar
 
 /**
  * Custom metadata which expands on what's required to display and adds a flag around requiring restarts.
@@ -21,7 +21,7 @@ inline fun <reified T : Any> ConfigRegistry.config(
     defaultValue: T,
     title: String,
     description: String,
-    requiresRestart: Boolean = false): ConfigDelegate<T> = config(
+    requiresRestart: Boolean = false): ConfigRegistrar<T> = config(
     key = key,
     defaultValue = defaultValue,
     metadata = object: RestartMetadata {

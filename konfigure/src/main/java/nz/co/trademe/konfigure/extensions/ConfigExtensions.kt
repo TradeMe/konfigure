@@ -1,9 +1,9 @@
 package nz.co.trademe.konfigure.extensions
 
-import nz.co.trademe.konfigure.api.ConfigDelegate
 import nz.co.trademe.konfigure.api.ConfigRegistry
-import nz.co.trademe.konfigure.model.ConfigItem
+import nz.co.trademe.konfigure.api.ConfigRegistrar
 import nz.co.trademe.konfigure.model.ConfigMetadata
+import kotlin.reflect.KProperty
 
 val ConfigRegistry.qualifiedGroup: String?
     get() {
@@ -16,10 +16,21 @@ val ConfigRegistry.qualifiedGroup: String?
         }
     }
 
+typealias MetadataProvider = (KProperty<*>) -> ConfigMetadata
+
+@Suppress("unused") // Unused suppression as it's used for extension function scoping
 inline fun <reified T : Any> ConfigRegistry.config(
-    key: String,
-    defaultValue: T,
-    metadata: ConfigMetadata = object: ConfigMetadata {}): ConfigDelegate<T> {
-    val configItem = ConfigItem(key, defaultValue, metadata)
-    return registerItem(configItem, T::class)
-}
+    key: String? = null,
+    defaultValue: T? = null,
+    metadata: ConfigMetadata? = null,
+    noinline metadataProvider: MetadataProvider? = when (metadata) {
+        null -> null
+        else -> {{ metadata }}
+    }
+): ConfigRegistrar<T> =
+    ConfigRegistrar(
+        key = key,
+        defaultValue = defaultValue,
+        metadataProvider = metadataProvider,
+        itemClass = T::class
+    )
