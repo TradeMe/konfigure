@@ -1,6 +1,6 @@
 # Konfigure
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [ ![Download](https://api.bintray.com/packages/trademe/Konfigure/konfigure/images/download.svg) ](https://bintray.com/trademe/Konfigure/konfigure/_latestVersion)
 
 Kotlin Property Delegation-based application configuration library. Tailored for Android, but ready for multiplatform.
 ## Download
