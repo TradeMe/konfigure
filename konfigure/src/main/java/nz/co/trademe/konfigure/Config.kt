@@ -1,9 +1,6 @@
 package nz.co.trademe.konfigure
 
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.broadcast
-import nz.co.trademe.konfigure.api.ConfigDelegate
 import nz.co.trademe.konfigure.api.ConfigRegistry
 import nz.co.trademe.konfigure.api.ConfigSource
 import nz.co.trademe.konfigure.api.OverrideHandler

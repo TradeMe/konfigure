@@ -23,9 +23,9 @@ internal sealed class ConfigAdapterModel(val key: String? = null) {
         val metadata: DisplayMetadata
     ) : ConfigAdapterModel(key = item.key)
 
-    data class LongConfig(
-        val item: ConfigItem<Long>,
-        val value: Long,
+    data class NumberConfig<T: Number>(
+        val item: ConfigItem<T>,
+        val value: T,
         val isModified: Boolean,
         val metadata: DisplayMetadata
     ) : ConfigAdapterModel(key = item.key)
