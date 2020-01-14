@@ -21,6 +21,14 @@ class AppConfig(context: Context): Config(
         description = "This is a test string"
     )
 
+
+    val theMeaningOfLife: Int by config(
+        key = "life_meaning",
+        defaultValue = 42,
+        title = "The Meaning of Life",
+        description = "As in title. Changing this has undefined output."
+    )
+
     /**
      * We can define config items by defaulting the key to be the name of the property.
      * In this case, this property will look up a String value keyed by "anotherOne"

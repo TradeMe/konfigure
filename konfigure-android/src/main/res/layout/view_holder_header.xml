@@ -17,7 +17,7 @@
         android:layout_marginBottom="8dp"
         android:maxLines="1"
         android:textColor="?attr/colorAccent"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Body2"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
         tools:text="Navigation" />
 
 </FrameLayout>

@@ -19,7 +19,6 @@ import nz.co.trademe.konfigure.android.extensions.applicationConfig
 import nz.co.trademe.konfigure.model.ConfigItem
 
 private const val ARG_CONFIG_ITEM_KEY = "arg_config_item_key"
-private const val ARG_EDIT_TYPE_ORDINAL = "arg_edit_type_ordinal"
 private const val ARG_CURRENT_VALUE = "arg_current_value"
 private const val TAG_EDIT_CONFIG = "tag_edit_config"
 
@@ -31,13 +30,6 @@ internal class EditConfigDialogFragment : DialogFragment() {
         get() = arguments?.getString(ARG_CONFIG_ITEM_KEY)?.let { key ->
             context?.applicationContext?.applicationConfig?.configItems?.find { it.key == key }
         } ?: throw IllegalArgumentException("Missing config item key argument")
-
-    private val editType: EditConfigType
-        get() {
-            val ordinal = arguments?.getInt(ARG_EDIT_TYPE_ORDINAL)
-                ?: throw IllegalArgumentException("Missing edit config ordinal argument")
-            return EditConfigType.values()[ordinal]
-        }
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -55,9 +47,11 @@ internal class EditConfigDialogFragment : DialogFragment() {
             }
         }
 
-        contentView.configTextInputEditText.inputType = when (editType) {
-            EditConfigType.STRING -> InputType.TYPE_CLASS_TEXT
-            EditConfigType.NUMBER -> InputType.TYPE_CLASS_NUMBER
+        contentView.configTextInputEditText.inputType = when (configItem.defaultValue) {
+            is String -> InputType.TYPE_CLASS_TEXT
+            is Int, is Long -> InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
+            is Float, is Double -> InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+            else -> contentView.configTextInputEditText.inputType
         }
 
         // Set the text on the input field
@@ -103,25 +97,35 @@ internal class EditConfigDialogFragment : DialogFragment() {
         // interface, but due to the type-checking implemented by the Config library, this callback
         // must be inline such that the library receives full type information.
         @Suppress("UNCHECKED_CAST")
-        when (editType) {
-            EditConfigType.STRING ->
-                contentView.context.applicationConfig.setValueOf(configItem as ConfigItem<String>, String::class, configValue)
-            EditConfigType.NUMBER ->
-                contentView.context.applicationConfig.setValueOf(configItem as ConfigItem<Long>, Long::class, configValue.toLong())
+        when (configItem.defaultValue) {
+            is String ->
+                setConfig(configValue)
+            is Int ->
+                setConfig(configValue.toInt())
+            is Long ->
+                setConfig(configValue.toLong())
+            is Float ->
+                setConfig(configValue.toFloat())
+            is Double ->
+                setConfig(configValue.toDouble())
         }
 
         // Dismiss the dialog.
         dialog?.dismiss()
     }
 
+    private inline fun <reified T: Any> setConfig(value: T) {
+        @Suppress("UNCHECKED_CAST")
+        contentView.context.applicationConfig.setValueOf(configItem as ConfigItem<T>, T::class, value)
+    }
+
     companion object {
 
         @JvmStatic
-        fun start(configItem: ConfigItem<*>, editConfigType: EditConfigType, currentValue: String, fragmentManager: FragmentManager) {
+        fun start(configItem: ConfigItem<*>, currentValue: String, fragmentManager: FragmentManager) {
             EditConfigDialogFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_CONFIG_ITEM_KEY, configItem.key)
-                    putInt(ARG_EDIT_TYPE_ORDINAL, editConfigType.ordinal)
                     putString(ARG_CURRENT_VALUE, currentValue)
                 }
             }.show(fragmentManager, TAG_EDIT_CONFIG)

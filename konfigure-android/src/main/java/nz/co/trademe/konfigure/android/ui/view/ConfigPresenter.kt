@@ -177,12 +177,10 @@ internal class ConfigPresenter(
     @Suppress("UNCHECKED_CAST")
     private fun ConfigItem<*>.toModel(): ConfigAdapterModel =
         when (defaultValue) {
-            is Long -> ConfigAdapterModel.LongConfig(
-                item = this as ConfigItem<Long>,
-                value = config.getValueOf(this, Long::class),
-                isModified = config.modifiedItems.contains(this),
-                metadata = metadata as DisplayMetadata
-            )
+            is Int -> toNumberModel<Int>()
+            is Long -> toNumberModel<Long>()
+            is Float -> toNumberModel<Float>()
+            is Double -> toNumberModel<Double>()
             is Boolean -> ConfigAdapterModel.BooleanConfig(
                 item = this as ConfigItem<Boolean>,
                 value = config.getValueOf(this, Boolean::class),
@@ -197,6 +195,14 @@ internal class ConfigPresenter(
             )
             else -> throw IllegalArgumentException("Unknown type $this")
         }
+
+    @Suppress("UNCHECKED_CAST")
+    private inline fun <reified T: Number> ConfigItem<*>.toNumberModel(): ConfigAdapterModel.NumberConfig<T> = ConfigAdapterModel.NumberConfig(
+        item = this as ConfigItem<T>,
+        value = config.getValueOf(this, T::class),
+        isModified = config.modifiedItems.contains(this),
+        metadata = metadata as DisplayMetadata
+    )
 
     private fun List<ConfigItem<*>>.mapToModel(): Array<ConfigAdapterModel> =
         map { it.toModel() }.toTypedArray()

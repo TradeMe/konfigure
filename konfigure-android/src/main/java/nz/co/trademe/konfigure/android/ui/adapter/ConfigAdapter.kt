@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import nz.co.trademe.konfigure.android.ui.adapter.viewholder.BooleanConfigViewHolder
 import nz.co.trademe.konfigure.android.ui.adapter.viewholder.DividerViewHolder
 import nz.co.trademe.konfigure.android.ui.adapter.viewholder.HeaderViewHolder
-import nz.co.trademe.konfigure.android.ui.adapter.viewholder.LongConfigViewHolder
+import nz.co.trademe.konfigure.android.ui.adapter.viewholder.NumberConfigViewHolder
 import nz.co.trademe.konfigure.android.ui.adapter.viewholder.ResetToDefaultFooterViewHolder
 import nz.co.trademe.konfigure.android.ui.adapter.viewholder.StringConfigViewHolder
 
@@ -21,7 +21,7 @@ internal class ConfigAdapter(
     enum class ViewType {
         HEADER,
         STRING,
-        LONG,
+        NUMBER,
         BOOLEAN,
         DIVIDER,
         RESET_FOOTER
@@ -31,7 +31,7 @@ internal class ConfigAdapter(
         when (getItem(position)) {
             is ConfigAdapterModel.GroupHeader -> ViewType.HEADER
             is ConfigAdapterModel.StringConfig -> ViewType.STRING
-            is ConfigAdapterModel.LongConfig -> ViewType.LONG
+            is ConfigAdapterModel.NumberConfig<*> -> ViewType.NUMBER
             is ConfigAdapterModel.BooleanConfig -> ViewType.BOOLEAN
             is ConfigAdapterModel.ResetToDefaultFooter -> ViewType.RESET_FOOTER
             ConfigAdapterModel.Divider -> ViewType.DIVIDER
@@ -41,7 +41,7 @@ internal class ConfigAdapter(
         when (ViewType.values()[viewType]) {
             ViewType.HEADER -> HeaderViewHolder(parent)
             ViewType.STRING -> StringConfigViewHolder(parent)
-            ViewType.LONG -> LongConfigViewHolder(parent)
+            ViewType.NUMBER -> NumberConfigViewHolder(parent)
             ViewType.BOOLEAN -> BooleanConfigViewHolder(parent)
             ViewType.DIVIDER -> DividerViewHolder(parent)
             ViewType.RESET_FOOTER -> ResetToDefaultFooterViewHolder(parent)
@@ -56,8 +56,8 @@ internal class ConfigAdapter(
                 val model = getItem(position) as ConfigAdapterModel.StringConfig
                 holder.bind(model)
             }
-            is LongConfigViewHolder -> {
-                val model = getItem(position) as ConfigAdapterModel.LongConfig
+            is NumberConfigViewHolder -> {
+                val model = getItem(position) as ConfigAdapterModel.NumberConfig<*>
                 holder.bind(model)
             }
             is BooleanConfigViewHolder -> {
