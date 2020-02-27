@@ -62,10 +62,16 @@ open class Config(
         get() = configItems.filter { overrideHandler.all.contains(it.key) }
 
     /**
-     * Boolean property describing if there are any local overrides present
+     * Boolean property describing if there are any local overrides present.
+     *
+     * Filters overrides by config item key, to ensure [hasLocalOverrides] doesn't
+     * present as true in cases where overrides contain values not associated with the current
+     * set of Config keys.
      */
     val hasLocalOverrides: Boolean
-        get() = overrideHandler.all.isNotEmpty()
+        get() = overrideHandler.all
+            .filter { entry -> configItems.any { it.key == entry.key} }
+            .isNotEmpty()
 
     override fun <T: Any> registerItem(item: ConfigItem<T>) {
         // Ensure the key of the item is unique
@@ -117,8 +123,17 @@ open class Config(
     fun clearOverrides() {
         // Collate all changes
         val changeEvents = overrideHandler.all
-            .map { entry ->
-                configItems.first { it.key == entry.key } to entry.value
+            .mapNotNull { entry ->
+                val item = configItems.firstOrNull { it.key == entry.key }
+
+                // If the item is null, the override key no longer exists in config. It may have been removed
+                // between app versions. As such, we should clear the override fo this key as it's now redundant.
+                if (item == null) {
+                    overrideHandler.clear(entry.key)
+                    null
+                } else {
+                    item to entry.value
+                }
             }
             .map { (item, currentValue) ->
                 ConfigChangeEvent(
