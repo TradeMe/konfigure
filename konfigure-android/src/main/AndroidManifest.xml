@@ -3,7 +3,6 @@
 
     <application>
         <activity
-            android:name=".ui.ConfigActivity"
-            android:theme="@style/Theme.Config.NoActionBar" />
+            android:name=".ui.ConfigActivity" />
     </application>
 </manifest>
