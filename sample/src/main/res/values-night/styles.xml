@@ -1,12 +1,12 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
 
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
-        <item name="colorPrimary">@color/purple_600</item>
+        <item name="colorPrimary">@color/purple_300</item>
         <item name="colorPrimaryDark">?colorSurface</item>
-        <item name="colorAccent">@color/light_blue_500</item>
+        <item name="colorAccent">@color/light_blue_200</item>
 
         <item name="toolbarStyle">@style/Widget.MaterialComponents.Toolbar.Surface</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
