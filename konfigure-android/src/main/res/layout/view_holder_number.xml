@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
+    android:background="?colorSurface"
     android:foreground="?selectableItemBackground"
     android:orientation="vertical"
     android:padding="16dp">

@@ -6,6 +6,7 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?selectableItemBackground"
+    android:background="?colorSurface"
     android:orientation="vertical"
     android:padding="16dp">
 
