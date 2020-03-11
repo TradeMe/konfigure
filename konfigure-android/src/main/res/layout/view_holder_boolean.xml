@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
     android:clickable="true"
     android:focusable="true"
+    android:background="?colorSurface"
     android:foreground="?selectableItemBackground"
     android:orientation="horizontal"
     android:padding="16dp">

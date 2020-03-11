@@ -2,9 +2,10 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:theme="@style/Theme.MaterialComponents.DayNight"
+    android:background="?android:colorBackground"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/black_5pc">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/emptyStateLayout"
@@ -14,15 +15,16 @@
         android:layout_marginTop="128dp"
         android:orientation="vertical"
         android:visibility="gone"
-        tools:visibility="visible"
-        tools:ignore="UseCompoundDrawables">
+        tools:ignore="UseCompoundDrawables"
+        tools:visibility="visible">
 
         <ImageView
             android:layout_width="54dp"
             android:layout_height="54dp"
             android:layout_gravity="center"
+            android:alpha="0.54"
             android:contentDescription="@null"
-            android:tint="@color/black_54pc"
+            android:tint="?colorOnSurface"
             android:tintMode="src_in"
             app:srcCompat="@drawable/ic_search_black_24dp"
             tools:targetApi="lollipop" />
@@ -31,8 +33,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-            android:text="@string/no_results_found" />
+            android:text="@string/no_results_found"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
     </LinearLayout>
 
     <nz.co.trademe.konfigure.android.ui.view.ConfigView
@@ -45,13 +47,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:elevation="4dp"
             android:minHeight="?actionBarSize"
-            android:theme="@style/MainToolbar"
-            app:layout_scrollFlags="scroll|enterAlways" />
+            style="@style/Widget.MaterialComponents.Toolbar.PrimarySurface"
+            android:theme="@style/ThemeOverlay.Konfigure.Toolbar.PrimarySurface"
+            app:layout_scrollFlags="scroll|enterAlways"
+            tools:targetApi="lollipop" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
