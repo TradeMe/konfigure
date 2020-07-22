@@ -34,9 +34,9 @@ class AppConfig: Config(configSources = listOf(LocalSource))
 ```kotlin
 class AppConfig: Config(configSources = listOf(LocalSource)) {
 
-	// The most simple config item, which uses the property name as a 
-	// key and sensible non-null default values
-	val someSimpleItem: Boolean by config()
+    // The most simple config item, which uses the property name as a 
+    // key and sensible non-null default values
+    val someSimpleItem: Boolean by config()
 
     // Add a simple config item 
     val someItem: Boolean by config(
