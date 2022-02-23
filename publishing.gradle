@@ -48,7 +48,7 @@ afterEvaluate {
 
                 // metadata
                 pom {
-                    name = project.ext.repo
+                    name = ARTIFACT_ID
                     description = 'SDK'
                     url = project.ext.url
                     licenses {
