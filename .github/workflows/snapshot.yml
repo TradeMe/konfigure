@@ -20,16 +20,12 @@ jobs:
           distribution: adopt
           java-version: 11
       - name: Release build
-        run: /gradlew build
+        run: ./gradlew build
       - name: Source jar and dokka
         run: ./gradlew androidSourcesJar javadocJar
       - name: Publish to MavenCentral
         run: ./gradlew publishReleasePublicationToSonatypeRepository
-      - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v2
-        with:
-         name: snapshot
-         path: covert/build/outputs/aar
+
 
 
 env:

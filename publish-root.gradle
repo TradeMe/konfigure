@@ -1,4 +1,3 @@
-
 // Create variables with empty default values
 ext["signing.keyId"] = ''
 ext["signing.password"] = ''
@@ -6,6 +5,7 @@ ext["signing.key"] = ''
 ext["ossrhUsername"] = ''
 ext["ossrhPassword"] = ''
 ext["sonatypeStagingProfileId"] = ''
+ext["snapshot"] = ''
 
 File secretPropsFile = project.rootProject.file('local.properties')
 if (secretPropsFile.exists()) {
@@ -24,17 +24,20 @@ if (secretPropsFile.exists()) {
     ext["snapshot"] = System.getenv('SNAPSHOT')
 }
 
-if (snapshot) {
+if (Boolean.parseBoolean(snapshot)) {
     ext["rootVersionName"] = project.ext.version + "-SNAPSHOT"
 } else {
     ext["rootVersionName"] = project.ext.version
 }
 
+
 // Set up Sonatype repository
 nexusPublishing {
     repositories {
         sonatype {
-            version = rootVersionName
+            useStaging.set(provider {
+                !Boolean.parseBoolean(snapshot)
+            })
             stagingProfileId = sonatypeStagingProfileId
             username = ossrhUsername
             password = ossrhPassword
