@@ -16,7 +16,7 @@ apply plugin: 'kotlin-android'
 
 ext {
     PUBLISH_VERSION = rootVersionName
-    ARTIFACT_ID = "kofigure-firebase"
+    ARTIFACT_ID = "konfigure-firebase"
 }
 
 apply from: '../common.gradle'

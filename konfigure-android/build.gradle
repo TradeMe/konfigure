@@ -17,7 +17,7 @@ apply plugin: 'kotlin-android-extensions'
 
 ext {
     PUBLISH_VERSION = rootVersionName
-    ARTIFACT_ID = "kofigure-android"
+    ARTIFACT_ID = "konfigure-android"
 }
 
 

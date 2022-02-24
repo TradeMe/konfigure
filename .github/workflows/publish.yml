@@ -21,7 +21,7 @@ jobs:
 
         # Builds the release artifacts of the library
       - name: Release build
-        run: ./gradlew assembleRelease  -x :konfigure-android:assembleRelease -x :konfigure-firebase:assembleRelease
+        run: ./gradlew build
 
         # Generates other artifacts
       - name: Source jar and dokka

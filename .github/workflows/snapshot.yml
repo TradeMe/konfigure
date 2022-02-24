@@ -20,7 +20,7 @@ jobs:
           distribution: adopt
           java-version: 11
       - name: Release build
-        run: ./gradlew assembleRelease  -x :konfigure-android:assembleRelease -x :konfigure-firebase:assembleRelease
+        run: /gradlew build
       - name: Source jar and dokka
         run: ./gradlew androidSourcesJar javadocJar
       - name: Publish to MavenCentral
