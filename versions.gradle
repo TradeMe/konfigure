@@ -1,11 +1,13 @@
 ext {
     versions = [
-            "minSdkVersion"      : 16,
-            "compileSdkVersion"  : 29,
-            "targetSdkVersion"   : 29,
+            "minSdkVersion"      : 19,
+            "compileSdkVersion"  : 30,
+            "targetSdkVersion"   : 30,
             "kotlin"             : "1.3.50",
             "coroutines"         : "1.3.0",
-            "androidgradleplugin": '3.5.0',
+            "androidgradleplugin": '4.0.1',
             "androidmavenplugin" : "3.6.2",
+            "nexusPublish"       : "1.1.0",
+            "dokka"              : "1.6.10",
     ]
 }

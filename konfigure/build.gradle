@@ -1,5 +1,10 @@
 apply plugin: 'kotlin'
 
+ext {
+    PUBLISH_VERSION = rootVersionName
+    ARTIFACT_ID = "konfigure"
+}
+
 apply from: '../common.gradle'
 apply from: '../publishing.gradle'
 

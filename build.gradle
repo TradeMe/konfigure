@@ -1,15 +1,21 @@
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+apply plugin: 'org.jetbrains.dokka'
+
 buildscript {
+    apply from: 'common.gradle'
     apply from: rootProject.file("versions.gradle")
 
     repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
         google()
         jcenter()
-        
+        mavenCentral()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$versions.androidgradleplugin"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
-        classpath "digital.wup:android-maven-publish:$versions.androidmavenplugin"
+        classpath "io.github.gradle-nexus:publish-plugin:$versions.nexusPublish"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$versions.dokka"
     }
 }
 
@@ -44,3 +50,4 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+apply from: "${rootDir}/publish-root.gradle"
