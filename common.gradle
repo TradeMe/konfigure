@@ -1,4 +1,4 @@
-ext.version = "1.1.1"
+ext.version = "1.2.0"
 ext.group = "nz.co.trademe.konfigure"
 ext.repo = "konfigure"
 ext.org = "trademe"
