@@ -4,7 +4,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -27,7 +31,7 @@ internal class ConfigPresenter(
     /**
      * Property acting as a search term relay for triggering async searching
      */
-    private val searchTermRelay = ConflatedBroadcastChannel(value = EMPTY_SEARCH_TERM)
+    private val searchTermRelay = MutableStateFlow(EMPTY_SEARCH_TERM)
 
     /**
      * Property for emitting config changes as a flow
@@ -37,7 +41,7 @@ internal class ConfigPresenter(
         emit(null)
 
         // Emit all config changes
-        emitAll(config.changes.openSubscription())
+        emitAll(config.changes)
     }
 
     /**
@@ -46,7 +50,7 @@ internal class ConfigPresenter(
      */
     val models: Flow<List<ConfigAdapterModel>> =
         changeNotifier
-            .combine(searchTermRelay.asFlow()) { _, searchTerm ->
+            .combine(searchTermRelay.asStateFlow()) { _, searchTerm ->
                 performSearch(searchTerm)
             }
             .flowOn(Dispatchers.IO)
@@ -58,9 +62,7 @@ internal class ConfigPresenter(
         filters.add(filter)
 
         // Rerun the last search
-        searchTermRelay.valueOrNull?.let {
-            searchTermRelay.offer(it)
-        }
+        searchTermRelay.tryEmit(searchTermRelay.value)
     }
 
     /**
@@ -69,7 +71,7 @@ internal class ConfigPresenter(
      * @param searchString The string to search using.
      */
     fun search(searchString: String) {
-        searchTermRelay.offer(searchString)
+        searchTermRelay.tryEmit(searchString)
     }
 
     /**

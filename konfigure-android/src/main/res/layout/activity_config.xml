@@ -24,10 +24,10 @@
             android:layout_gravity="center"
             android:alpha="0.54"
             android:contentDescription="@null"
-            android:tint="?colorOnSurface"
             android:tintMode="src_in"
             app:srcCompat="@drawable/ic_search_black_24dp"
-            tools:targetApi="lollipop" />
+            tools:targetApi="lollipop"
+            app:tint="?colorOnSurface" />
 
         <TextView
             android:layout_width="wrap_content"

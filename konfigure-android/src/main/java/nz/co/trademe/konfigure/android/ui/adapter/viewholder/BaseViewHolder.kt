@@ -2,11 +2,11 @@ package nz.co.trademe.konfigure.android.ui.adapter.viewholder
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.extensions.LayoutContainer
+import androidx.viewbinding.ViewBinding
 
 /**
- * Simple base for ViewHolders which implements [LayoutContainer]
+ * Simple base for ViewHolders
  */
-internal open class BaseViewHolder(
-    override val containerView: View
-): RecyclerView.ViewHolder(containerView), LayoutContainer
+internal open class BaseViewHolder<VB : ViewBinding>(
+    protected val binding: VB
+): RecyclerView.ViewHolder(binding.root)

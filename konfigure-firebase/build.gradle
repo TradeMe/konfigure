@@ -22,6 +22,9 @@ ext {
 apply from: '../common.gradle'
 apply from: '../publishing.gradle'
 
+android {
+    namespace 'nz.co.trademe.konfigure.firebase'
+}
 
 
 dependencies {
@@ -29,6 +32,6 @@ dependencies {
 
     api project(":konfigure")
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
-    implementation "com.google.firebase:firebase-config:19.0.0"
+    implementation "com.google.firebase:firebase-config-ktx:$versions.firebaseConfig"
+    implementation "com.google.firebase:firebase-analytics-ktx:$versions.firebaseAnalytics"
 }

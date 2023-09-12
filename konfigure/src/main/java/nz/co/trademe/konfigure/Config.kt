@@ -1,6 +1,14 @@
 package nz.co.trademe.konfigure
 
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.mapNotNull
 import nz.co.trademe.konfigure.api.ConfigRegistry
 import nz.co.trademe.konfigure.api.ConfigSource
 import nz.co.trademe.konfigure.api.OverrideHandler
@@ -47,8 +55,8 @@ open class Config(
     /**
      * Config changes are modeled as a hot stream of [ConfigChangeEvent]s
      */
-    @Suppress("EXPERIMENTAL_API_USAGE")
-    val changes = ConflatedBroadcastChannel<ConfigChangeEvent<*>>()
+    private val _changes = MutableStateFlow<ConfigChangeEvent<*>?>(null)
+    val changes: Flow<ConfigChangeEvent<*>> = _changes.filterNotNull()
 
     /**
      * List of all config items binded to this config instance
@@ -107,7 +115,7 @@ open class Config(
         overrideHandler.set(item.key, newValue.let(mapper.toString))
 
         // Emit change
-        changes.offer(
+        _changes.tryEmit(
             ConfigChangeEvent(
                 key = item.key,
                 oldValue = oldValue,
@@ -151,7 +159,7 @@ open class Config(
 
         // Publish events
         changeEvents.forEach {
-            changes.offer(it)
+            _changes.tryEmit(it)
         }
     }
 

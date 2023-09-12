@@ -42,7 +42,6 @@ class ConfigRestartActivity : ConfigActivity() {
         // Observe changes and determine if a restart is required
         lifecycleScope.launch {
             applicationConfig.changes
-                .asFlow()
                 // Only keep items which have restart information, and require tracking
                 .filter { (it.metadata as? RestartMetadata)?.requiresRestart == true }
 

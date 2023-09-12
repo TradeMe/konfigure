@@ -18,6 +18,6 @@ class FilteredConfigActivity: ConfigActivity() {
             }
         }
 
-        configurationView.addFilter(filter)
+        binding.configView.addFilter(filter)
     }
 }
