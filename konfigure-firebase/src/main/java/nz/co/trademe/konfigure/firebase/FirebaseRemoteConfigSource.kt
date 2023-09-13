@@ -12,7 +12,7 @@ import nz.co.trademe.konfigure.api.ConfigSource
  *
  * @param remoteConfig The [FirebaseRemoteConfig] instance to use for retrieving values from
  */
-class FirebaseRemoteConfigSource(
+class FirebaseRemoteConfigSource @JvmOverloads constructor(
     private val remoteConfig: FirebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
 ): ConfigSource {
 
@@ -21,22 +21,18 @@ class FirebaseRemoteConfigSource(
     /**
      * Registers a listener for config updates
      *
-     * @param onUpdate A callback to be invoked when the remote config is updated
-     * @param onError A callback to be invoked when an error occurs while updating the remote config
+     * @param listener The listener to register for config updates
      */
-    fun registerConfigUpdateListener(
-        onUpdate: (ConfigUpdate) -> Unit,
-        onError: (FirebaseRemoteConfigException) -> Unit
-    ) {
+    fun registerConfigUpdateListener(listener: FirebaseConfigUpdateListener) {
         registration = remoteConfig.addOnConfigUpdateListener(object : ConfigUpdateListener {
             override fun onUpdate(configUpdate: ConfigUpdate) {
                 remoteConfig.activate().addOnCompleteListener {
-                    onUpdate(configUpdate)
+                    listener.onConfigUpdate(configUpdate)
                 }
             }
 
             override fun onError(error: FirebaseRemoteConfigException) {
-                onError.invoke(error)
+                listener.onConfigError(error)
             }
         })
     }
