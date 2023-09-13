@@ -1,6 +1,5 @@
 package nz.co.trademe.konfigure.android.ui.adapter.viewholder
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 

@@ -12,6 +12,5 @@ ext {
             "appcompat"          : "1.6.1",
             "material"           : "1.9.0",
             "firebaseConfig"     : "21.4.1",
-            "firebaseAnalytics"  : "21.3.0",
     ]
 }

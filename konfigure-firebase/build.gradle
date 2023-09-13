@@ -33,5 +33,4 @@ dependencies {
     api project(":konfigure")
 
     implementation "com.google.firebase:firebase-config-ktx:$versions.firebaseConfig"
-    implementation "com.google.firebase:firebase-analytics-ktx:$versions.firebaseAnalytics"
 }
