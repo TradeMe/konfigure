@@ -13,4 +13,5 @@
     <string name="reset_to_default">Reset to default</string>
     <string name="reset_experiments_description">Reset all config values back to their default state</string>
     <string name="configuration">Configuration</string>
+    <string name="today">Today</string>
 </resources>

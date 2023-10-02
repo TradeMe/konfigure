@@ -1,10 +1,13 @@
 package nz.co.trademe.konfigure.android.ui.adapter
 
+import android.view.LayoutInflater
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
+import kotlinx.coroutines.NonDisposableHandle.parent
 import nz.co.trademe.konfigure.android.ui.adapter.viewholder.BooleanConfigViewHolder
+import nz.co.trademe.konfigure.android.ui.adapter.viewholder.DateConfigViewHolder
 import nz.co.trademe.konfigure.android.ui.adapter.viewholder.DividerViewHolder
 import nz.co.trademe.konfigure.android.ui.adapter.viewholder.HeaderViewHolder
 import nz.co.trademe.konfigure.android.ui.adapter.viewholder.NumberConfigViewHolder
@@ -23,6 +26,7 @@ internal class ConfigAdapter(
         STRING,
         NUMBER,
         BOOLEAN,
+        DATE,
         DIVIDER,
         RESET_FOOTER
     }
@@ -33,6 +37,7 @@ internal class ConfigAdapter(
             is ConfigAdapterModel.StringConfig -> ViewType.STRING
             is ConfigAdapterModel.NumberConfig<*> -> ViewType.NUMBER
             is ConfigAdapterModel.BooleanConfig -> ViewType.BOOLEAN
+            is ConfigAdapterModel.DateConfig -> ViewType.DATE
             is ConfigAdapterModel.ResetToDefaultFooter -> ViewType.RESET_FOOTER
             ConfigAdapterModel.Divider -> ViewType.DIVIDER
         }.ordinal
@@ -43,6 +48,7 @@ internal class ConfigAdapter(
             ViewType.STRING -> StringConfigViewHolder(parent)
             ViewType.NUMBER -> NumberConfigViewHolder(parent)
             ViewType.BOOLEAN -> BooleanConfigViewHolder(parent)
+            ViewType.DATE -> DateConfigViewHolder(parent)
             ViewType.DIVIDER -> DividerViewHolder(parent)
             ViewType.RESET_FOOTER -> ResetToDefaultFooterViewHolder(parent)
         }
@@ -66,6 +72,10 @@ internal class ConfigAdapter(
             }
             is ResetToDefaultFooterViewHolder -> {
                 holder.bind(resetAllCallback)
+            }
+            is DateConfigViewHolder -> {
+                val model = getItem(position) as ConfigAdapterModel.DateConfig
+                holder.bind(model)
             }
             is DividerViewHolder -> { /* Nothing to bind */
             }

@@ -1,13 +1,9 @@
 package nz.co.trademe.konfigure.android.ui.view
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
@@ -18,6 +14,7 @@ import nz.co.trademe.konfigure.android.ui.DisplayMetadata
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
 import nz.co.trademe.konfigure.model.ConfigChangeEvent
 import nz.co.trademe.konfigure.model.ConfigItem
+import java.util.Date
 
 private const val EMPTY_SEARCH_TERM = ""
 
@@ -192,6 +189,12 @@ internal class ConfigPresenter(
             is String -> ConfigAdapterModel.StringConfig(
                 item = this as ConfigItem<String>,
                 value = config.getValueOf(this, String::class),
+                isModified = config.modifiedItems.contains(this),
+                metadata = metadata as DisplayMetadata
+            )
+            is Date -> ConfigAdapterModel.DateConfig(
+                item = this as ConfigItem<Date>,
+                value = config.getValueOf(this, Date::class),
                 isModified = config.modifiedItems.contains(this),
                 metadata = metadata as DisplayMetadata
             )

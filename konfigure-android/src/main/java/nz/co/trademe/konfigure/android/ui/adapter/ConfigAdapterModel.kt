@@ -2,6 +2,7 @@ package nz.co.trademe.konfigure.android.ui.adapter
 
 import nz.co.trademe.konfigure.android.ui.DisplayMetadata
 import nz.co.trademe.konfigure.model.ConfigItem
+import java.util.Date
 
 private const val RESET_FOOTER_KEY = "reset_to_default_key"
 
@@ -33,6 +34,13 @@ internal sealed class ConfigAdapterModel(val key: String? = null) {
     data class BooleanConfig(
         val item: ConfigItem<Boolean>,
         val value: Boolean,
+        val isModified: Boolean,
+        val metadata: DisplayMetadata
+    ) : ConfigAdapterModel(key = item.key)
+
+    data class DateConfig(
+        val item: ConfigItem<Date>,
+        val value: Date,
         val isModified: Boolean,
         val metadata: DisplayMetadata
     ) : ConfigAdapterModel(key = item.key)
