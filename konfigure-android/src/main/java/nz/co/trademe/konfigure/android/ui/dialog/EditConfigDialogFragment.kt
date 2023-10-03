@@ -13,8 +13,8 @@ import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
-import kotlinx.android.synthetic.main.edit_config_dialog.view.*
 import nz.co.trademe.konfigure.android.R
+import nz.co.trademe.konfigure.android.databinding.EditConfigDialogBinding
 import nz.co.trademe.konfigure.android.extensions.applicationConfig
 import nz.co.trademe.konfigure.model.ConfigItem
 
@@ -24,7 +24,8 @@ private const val TAG_EDIT_CONFIG = "tag_edit_config"
 
 internal class EditConfigDialogFragment : DialogFragment() {
 
-    private lateinit var contentView: View
+    private var _binding: EditConfigDialogBinding? = null
+    private val binding get() = _binding!!
 
     private val configItem: ConfigItem<*>
         get() = arguments?.getString(ARG_CONFIG_ITEM_KEY)?.let { key ->
@@ -35,34 +36,36 @@ internal class EditConfigDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // Create our custom view with the edit text.
         val layoutInflater = LayoutInflater.from(context)
-        contentView = layoutInflater.inflate(R.layout.edit_config_dialog, null, false)
+        _binding = EditConfigDialogBinding.inflate(layoutInflater)
 
-        // Handle the tick in the on-screen keyboard.
-        contentView.configTextInputEditText.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                onOkayClicked()
-                true
-            } else {
-                false
+        with(binding) {
+            // Handle the tick in the on-screen keyboard.
+            configTextInputEditText.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent? ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    onOkayClicked()
+                    true
+                } else {
+                    false
+                }
             }
-        }
 
-        contentView.configTextInputEditText.inputType = when (configItem.defaultValue) {
-            is String -> InputType.TYPE_CLASS_TEXT
-            is Int, is Long -> InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
-            is Float, is Double -> InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-            else -> contentView.configTextInputEditText.inputType
-        }
+            configTextInputEditText.inputType = when (configItem.defaultValue) {
+                is String -> InputType.TYPE_CLASS_TEXT
+                is Int, is Long -> InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
+                is Float, is Double -> InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+                else -> configTextInputEditText.inputType
+            }
 
-        // Set the text on the input field
-        arguments?.getString(ARG_CURRENT_VALUE)?.let {
-            contentView.configTextInputEditText.append(it)
+            // Set the text on the input field
+            arguments?.getString(ARG_CURRENT_VALUE)?.let {
+                configTextInputEditText.append(it)
+            }
         }
 
         // Build the dialog.
         val dialog = AlertDialog.Builder(requireActivity())
             .setTitle(R.string.edit_config)
-            .setView(contentView)
+            .setView(binding.root)
             .setPositiveButton(R.string.ok, null)
             .setNegativeButton(R.string.cancel, null)
             .create()
@@ -81,15 +84,20 @@ internal class EditConfigDialogFragment : DialogFragment() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     /**
      * Called when the user clicks the OK button.
      */
     private fun onOkayClicked() {
-        val configValue = contentView.configTextInputEditText.text?.trim().toString()
+        val configValue = binding.configTextInputEditText.text?.trim().toString()
 
         // Don't allow updating to an empty String
         if (configValue.isEmpty()) {
-            contentView.configTextInputLayout.error = getString(R.string.config_blank_error)
+            binding.configTextInputLayout.error = getString(R.string.config_blank_error)
             return
         }
 
@@ -116,7 +124,7 @@ internal class EditConfigDialogFragment : DialogFragment() {
 
     private inline fun <reified T: Any> setConfig(value: T) {
         @Suppress("UNCHECKED_CAST")
-        contentView.context.applicationConfig.setValueOf(configItem as ConfigItem<T>, T::class, value)
+        requireContext().applicationConfig.setValueOf(configItem as ConfigItem<T>, T::class, value)
     }
 
     companion object {

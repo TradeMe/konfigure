@@ -1,12 +1,16 @@
 package nz.co.trademe.konfigure
 
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import nz.co.trademe.konfigure.api.ConfigRegistry
 import nz.co.trademe.konfigure.api.ConfigSource
 import nz.co.trademe.konfigure.api.OverrideHandler
+import nz.co.trademe.konfigure.extensions.configDateFormat
 import nz.co.trademe.konfigure.internal.InMemoryOverrideHandler
 import nz.co.trademe.konfigure.model.ConfigChangeEvent
 import nz.co.trademe.konfigure.model.ConfigItem
+import java.util.Date
 import kotlin.reflect.KClass
 
 /**
@@ -42,13 +46,13 @@ import kotlin.reflect.KClass
 open class Config(
     private val configSources: List<ConfigSource>,
     private val overrideHandler: OverrideHandler = InMemoryOverrideHandler()
-): ConfigRegistry {
+) : ConfigRegistry {
 
     /**
      * Config changes are modeled as a hot stream of [ConfigChangeEvent]s
      */
-    @Suppress("EXPERIMENTAL_API_USAGE")
-    val changes = ConflatedBroadcastChannel<ConfigChangeEvent<*>>()
+    private val _changes = MutableStateFlow<ConfigChangeEvent<*>?>(null)
+    val changes: Flow<ConfigChangeEvent<*>> = _changes.filterNotNull()
 
     /**
      * List of all config items binded to this config instance
@@ -70,10 +74,10 @@ open class Config(
      */
     val hasLocalOverrides: Boolean
         get() = overrideHandler.all
-            .filter { entry -> configItems.any { it.key == entry.key} }
+            .filter { entry -> configItems.any { it.key == entry.key } }
             .isNotEmpty()
 
-    override fun <T: Any> registerItem(item: ConfigItem<T>) {
+    override fun <T : Any> registerItem(item: ConfigItem<T>) {
         // Ensure the key of the item is unique
         val duplicateKeyEntry = configItems.asSequence().find { it.key == item.key }
 
@@ -107,7 +111,7 @@ open class Config(
         overrideHandler.set(item.key, newValue.let(mapper.toString))
 
         // Emit change
-        changes.offer(
+        _changes.tryEmit(
             ConfigChangeEvent(
                 key = item.key,
                 oldValue = oldValue,
@@ -151,12 +155,12 @@ open class Config(
 
         // Publish events
         changeEvents.forEach {
-            changes.offer(it)
+            _changes.tryEmit(it)
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T: Any> resolveAdapterForClass(clazz: KClass<T>): TypeAdapter<T> =
+    private fun <T : Any> resolveAdapterForClass(clazz: KClass<T>): TypeAdapter<T> =
         DEFAULT_TYPE_ADAPTERS.firstOrNull { it.clazz == clazz } as? TypeAdapter<T>
             ?: throw NoSuchElementException("Type argument $clazz is not supported by konfigure.")
 
@@ -201,6 +205,12 @@ open class Config(
                 clazz = String::class,
                 fromString = { it },
                 toString = { it }
-            ))
+            ),
+            TypeAdapter(
+                clazz = Date::class,
+                fromString = { configDateFormat.parse(it) },
+                toString = { configDateFormat.format(it) }
+            )
+        )
     }
 }

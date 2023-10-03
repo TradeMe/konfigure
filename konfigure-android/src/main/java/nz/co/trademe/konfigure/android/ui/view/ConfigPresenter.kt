@@ -1,10 +1,10 @@
 package nz.co.trademe.konfigure.android.ui.view
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -14,6 +14,7 @@ import nz.co.trademe.konfigure.android.ui.DisplayMetadata
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
 import nz.co.trademe.konfigure.model.ConfigChangeEvent
 import nz.co.trademe.konfigure.model.ConfigItem
+import java.util.Date
 
 private const val EMPTY_SEARCH_TERM = ""
 
@@ -27,7 +28,7 @@ internal class ConfigPresenter(
     /**
      * Property acting as a search term relay for triggering async searching
      */
-    private val searchTermRelay = ConflatedBroadcastChannel(value = EMPTY_SEARCH_TERM)
+    private val searchTermRelay = MutableStateFlow(EMPTY_SEARCH_TERM)
 
     /**
      * Property for emitting config changes as a flow
@@ -37,7 +38,7 @@ internal class ConfigPresenter(
         emit(null)
 
         // Emit all config changes
-        emitAll(config.changes.openSubscription())
+        emitAll(config.changes)
     }
 
     /**
@@ -46,7 +47,7 @@ internal class ConfigPresenter(
      */
     val models: Flow<List<ConfigAdapterModel>> =
         changeNotifier
-            .combine(searchTermRelay.asFlow()) { _, searchTerm ->
+            .combine(searchTermRelay.asStateFlow()) { _, searchTerm ->
                 performSearch(searchTerm)
             }
             .flowOn(Dispatchers.IO)
@@ -58,9 +59,7 @@ internal class ConfigPresenter(
         filters.add(filter)
 
         // Rerun the last search
-        searchTermRelay.valueOrNull?.let {
-            searchTermRelay.offer(it)
-        }
+        searchTermRelay.tryEmit(searchTermRelay.value)
     }
 
     /**
@@ -69,7 +68,7 @@ internal class ConfigPresenter(
      * @param searchString The string to search using.
      */
     fun search(searchString: String) {
-        searchTermRelay.offer(searchString)
+        searchTermRelay.tryEmit(searchString)
     }
 
     /**
@@ -190,6 +189,12 @@ internal class ConfigPresenter(
             is String -> ConfigAdapterModel.StringConfig(
                 item = this as ConfigItem<String>,
                 value = config.getValueOf(this, String::class),
+                isModified = config.modifiedItems.contains(this),
+                metadata = metadata as DisplayMetadata
+            )
+            is Date -> ConfigAdapterModel.DateConfig(
+                item = this as ConfigItem<Date>,
+                value = config.getValueOf(this, Date::class),
                 isModified = config.modifiedItems.contains(this),
                 metadata = metadata as DisplayMetadata
             )

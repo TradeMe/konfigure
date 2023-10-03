@@ -6,13 +6,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import nz.co.trademe.konfigure.sample.R
+import nz.co.trademe.konfigure.sample.databinding.ViewholderExampleBinding
 import nz.co.trademe.konfigure.sample.examples.Example
 
 class ExamplesAdapter: ListAdapter<Example, ExamplesViewHolder>(EXAMPLES_DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExamplesViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.viewholder_example, parent, false)
-        return ExamplesViewHolder(containerView = view)
+        val binding = ViewholderExampleBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ExamplesViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ExamplesViewHolder, position: Int) {

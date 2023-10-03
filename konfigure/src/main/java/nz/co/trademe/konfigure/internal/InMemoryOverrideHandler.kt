@@ -21,6 +21,6 @@ internal class InMemoryOverrideHandler: OverrideHandler {
     }
 
     override val all: Map<String, String>
-        get() = backingMap
+        get() = backingMap.toMap()
 
 }

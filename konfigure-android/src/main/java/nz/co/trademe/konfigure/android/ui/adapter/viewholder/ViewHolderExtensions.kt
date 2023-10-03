@@ -6,13 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.viewbinding.ViewBinding
 import nz.co.trademe.konfigure.android.R
 
 /**
  * Helper function for allowing simple ViewHolder view inflation
  */
-internal fun ViewGroup.inflate(@LayoutRes resource: Int): View =
-    LayoutInflater.from(context).inflate(resource, this, false)
+internal fun <VB : ViewBinding> ViewGroup.inflate(inflate: (LayoutInflater, ViewGroup, Boolean) -> VB): VB {
+    return inflate(LayoutInflater.from(context), this, false)
+}
 
 internal fun TextView.applyMonospaceFont() {
     val typeface = Typeface.createFromAsset(context.assets, "fonts/RobotoMono-Regular.ttf")

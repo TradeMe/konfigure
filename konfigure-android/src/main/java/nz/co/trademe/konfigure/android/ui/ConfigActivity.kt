@@ -9,8 +9,8 @@ import android.view.inputmethod.InputMethodManager
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import kotlinx.android.synthetic.main.activity_config.*
 import nz.co.trademe.konfigure.android.R
+import nz.co.trademe.konfigure.android.databinding.ActivityConfigBinding
 import nz.co.trademe.konfigure.android.ui.view.ConfigView
 
 /**
@@ -20,21 +20,22 @@ import nz.co.trademe.konfigure.android.ui.view.ConfigView
  *
  * To use, simply call [ConfigActivity.start]
  */
-open class ConfigActivity: AppCompatActivity() {
+open class ConfigActivity : AppCompatActivity() {
 
-    val configurationView: ConfigView
-        get() = configView
+    private var _binding: ActivityConfigBinding? = null
+    protected val binding get() = _binding!!
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_config)
+        _binding = ActivityConfigBinding.inflate(layoutInflater)
+        setContentView(binding.root)
     }
 
     @CallSuper
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar)
         setTitle(R.string.configuration)
 
         supportActionBar?.apply {
@@ -53,18 +54,23 @@ open class ConfigActivity: AppCompatActivity() {
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                configView.search(query ?: "")
+                binding.configView.search(query ?: "")
                 hideSoftKeyboard()
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                configView.search(newText ?: "")
+                binding.configView.search(newText ?: "")
                 return true
             }
         })
 
         return true
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
     @CallSuper
@@ -74,6 +80,7 @@ open class ConfigActivity: AppCompatActivity() {
                 finish()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
