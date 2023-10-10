@@ -1,10 +1,11 @@
 package nz.co.trademe.konfigure.android.ui.view
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -31,6 +32,11 @@ internal class ConfigPresenter(
     private val searchTermRelay = MutableStateFlow(EMPTY_SEARCH_TERM)
 
     /**
+     * Property acting as a search trigger for triggering async searching
+     */
+    private val searchTrigger = MutableSharedFlow<Unit>(replay = 1, onBufferOverflow = BufferOverflow.DROP_LATEST)
+
+    /**
      * Property for emitting config changes as a flow
      */
     private val changeNotifier: Flow<ConfigChangeEvent<*>?> = flow {
@@ -45,12 +51,14 @@ internal class ConfigPresenter(
      * Property exposed to consumers for observing. This combines the config changes emitted by [Config.changes],
      * and the search term relay. It then performs a search on the IO dispatcher and emits the results
      */
-    val models: Flow<List<ConfigAdapterModel>> =
-        changeNotifier
-            .combine(searchTermRelay.asStateFlow()) { _, searchTerm ->
-                performSearch(searchTerm)
-            }
-            .flowOn(Dispatchers.IO)
+    val models: Flow<List<ConfigAdapterModel>> = combine(
+        changeNotifier,
+        searchTrigger,
+        searchTermRelay
+    ) { _, _, searchTerm ->
+        performSearch(searchTerm)
+    }
+        .flowOn(Dispatchers.IO)
 
     /**
      * Adds a given filter to the internal list of filters and notifies the presenter to re-emit changes.
@@ -59,7 +67,7 @@ internal class ConfigPresenter(
         filters.add(filter)
 
         // Rerun the last search
-        searchTermRelay.tryEmit(searchTermRelay.value)
+        searchTrigger.tryEmit(Unit)
     }
 
     /**
@@ -186,23 +194,26 @@ internal class ConfigPresenter(
                 isModified = config.modifiedItems.contains(this),
                 metadata = metadata as DisplayMetadata
             )
+
             is String -> ConfigAdapterModel.StringConfig(
                 item = this as ConfigItem<String>,
                 value = config.getValueOf(this, String::class),
                 isModified = config.modifiedItems.contains(this),
                 metadata = metadata as DisplayMetadata
             )
+
             is Date -> ConfigAdapterModel.DateConfig(
                 item = this as ConfigItem<Date>,
                 value = config.getValueOf(this, Date::class),
                 isModified = config.modifiedItems.contains(this),
                 metadata = metadata as DisplayMetadata
             )
+
             else -> throw IllegalArgumentException("Unknown type $this")
         }
 
     @Suppress("UNCHECKED_CAST")
-    private inline fun <reified T: Number> ConfigItem<*>.toNumberModel(): ConfigAdapterModel.NumberConfig<T> = ConfigAdapterModel.NumberConfig(
+    private inline fun <reified T : Number> ConfigItem<*>.toNumberModel(): ConfigAdapterModel.NumberConfig<T> = ConfigAdapterModel.NumberConfig(
         item = this as ConfigItem<T>,
         value = config.getValueOf(this, T::class),
         isModified = config.modifiedItems.contains(this),
