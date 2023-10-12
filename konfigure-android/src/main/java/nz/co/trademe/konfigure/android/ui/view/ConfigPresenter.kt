@@ -71,6 +71,13 @@ internal class ConfigPresenter(
     }
 
     /**
+     * Triggers a search on the config items
+     */
+    fun search() {
+        searchTrigger.tryEmit(Unit)
+    }
+
+    /**
      * Perform a search on the config items given a search string.
      *
      * @param searchString The string to search using.

@@ -44,6 +44,7 @@ class ConfigView @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        presenter.search()
         launch(modelObservationJob) {
             presenter.models.collect { models ->
                 withContext(Dispatchers.Main) {
