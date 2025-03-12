@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 35
     namespace 'nz.co.trademe.konfigure.sample'
     defaultConfig {
         applicationId "nz.co.trademe.konfigure.sample"
