@@ -1,4 +1,4 @@
-ext.version = "1.3.2"
+ext.version = "1.4.0"
 ext.group = "nz.co.trademe.konfigure"
 ext.repo = "konfigure"
 ext.org = "trademe"
@@ -8,3 +8,10 @@ ext.connection = 'scm:git:github.com/TradeMe/konfigure.git'
 ext.developerConnection = 'scm:git:ssh://github.com/TradeMe/konfigure.git'
 
 ext.description = 'An Application Configuration Library based on Kotlin Property Delegation'
+
+repositories {
+    mavenCentral()
+    google()
+    maven { url "https://jitpack.io" }
+    mavenLocal()
+}

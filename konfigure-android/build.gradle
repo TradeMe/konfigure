@@ -4,7 +4,8 @@ buildscript {
     repositories {
         mavenCentral()
         google()
-        jcenter()
+        maven { url "https://jitpack.io" }
+        mavenLocal()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$versions.androidgradleplugin"
@@ -41,6 +42,6 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "com.google.android.material:material:$versions.material"
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.0'
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
 }

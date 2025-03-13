@@ -6,10 +6,11 @@ buildscript {
     apply from: rootProject.file("versions.gradle")
 
     repositories {
-        maven { url "https://plugins.gradle.org/m2/" }
-        google()
-        jcenter()
         mavenCentral()
+        google()
+        maven { url "https://jitpack.io" }
+        mavenLocal()
+        maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$versions.androidgradleplugin"
@@ -22,7 +23,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
     }
 
     apply from: rootProject.file("versions.gradle")
@@ -46,6 +46,14 @@ allprojects {
                 kotlinOptions {
                     jvmTarget = '17'
                 }
+
+                // Include sources in the jar
+                publishing {
+                    singleVariant("release") {
+                        withSourcesJar()
+                        withJavadocJar()
+                    }
+                }
             }
         }
     }
@@ -54,4 +62,5 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
 apply from: "${rootDir}/publish-root.gradle"
