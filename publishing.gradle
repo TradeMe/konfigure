@@ -55,11 +55,6 @@ afterEvaluate {
                         }
                     }
                     developers {
-                        developer {
-                            id = 'maxim'
-                            name = 'Maxim Ilyukhin'
-                            email = 'maxim.ilyukhin@trademe.co.nz'
-                        }
                         // Add all other devs here...
                     }
 
