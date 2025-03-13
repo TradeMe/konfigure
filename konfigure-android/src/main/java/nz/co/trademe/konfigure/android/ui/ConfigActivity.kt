@@ -5,10 +5,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import nz.co.trademe.konfigure.android.R
 import nz.co.trademe.konfigure.android.databinding.ActivityConfigBinding
 import nz.co.trademe.konfigure.android.ui.view.ConfigView
@@ -41,6 +44,12 @@ open class ConfigActivity : AppCompatActivity() {
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setHomeButtonEnabled(true)
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { v: View, insets: WindowInsetsCompat ->
+            val insetValues = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            v.setPadding(insetValues.left, insetValues.top, insetValues.right, v.paddingBottom)
+            insets
         }
     }
 
