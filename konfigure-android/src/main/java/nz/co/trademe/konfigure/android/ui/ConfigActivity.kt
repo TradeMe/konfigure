@@ -51,6 +51,12 @@ open class ConfigActivity : AppCompatActivity() {
             v.setPadding(insetValues.left, insetValues.top, insetValues.right, v.paddingBottom)
             insets
         }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.configView) { v: View, insets: WindowInsetsCompat ->
+            val insetValues = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            v.setPadding(insetValues.left, v.paddingTop, insetValues.right, insetValues.bottom)
+            insets
+        }
     }
 
     @CallSuper
