@@ -10,3 +10,7 @@ Other things to consider:
 * all tests should pass
 * new features should be accompanied by tests
 * breaking changes should be avoided
+
+## Local testing
+Run the included sample app to test your changes. Then Generate a local snapshot to test the integration with other apps:
+`./gradlew publishToMavenLocal`

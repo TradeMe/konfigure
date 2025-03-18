@@ -14,19 +14,18 @@ task androidSourcesJar(type: Jar) {
         from sourceSets.main.java.srcDirs
         from sourceSets.main.kotlin.srcDirs
     }
-
-
 }
+
 task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
     archiveClassifier.set('javadoc')
     from dokkaJavadoc.outputDirectory
 }
 
+
 artifacts {
     archives androidSourcesJar
     archives javadocJar
 }
-
 
 afterEvaluate {
     publishing {
@@ -41,10 +40,8 @@ afterEvaluate {
                     from components.release
                 } else {
                     from components.java
+                    artifact(tasks["kotlinSources"])
                 }
-
-                artifact androidSourcesJar
-                artifact javadocJar
 
                 // metadata
                 pom {
@@ -58,11 +55,6 @@ afterEvaluate {
                         }
                     }
                     developers {
-                        developer {
-                            id = 'maxim'
-                            name = 'Maxim Ilyukhin'
-                            email = 'maxim.ilyukhin@trademe.co.nz'
-                        }
                         // Add all other devs here...
                     }
 
@@ -93,6 +85,6 @@ signing {
     }
 }
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }

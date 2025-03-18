@@ -6,10 +6,11 @@ buildscript {
     apply from: rootProject.file("versions.gradle")
 
     repositories {
-        maven { url "https://plugins.gradle.org/m2/" }
-        google()
-        jcenter()
         mavenCentral()
+        google()
+        maven { url "https://jitpack.io" }
+        mavenLocal()
+        maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$versions.androidgradleplugin"
@@ -22,7 +23,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
     }
 
     apply from: rootProject.file("versions.gradle")
@@ -32,16 +32,28 @@ allprojects {
         if (plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")) {
             android.compileSdkVersion = versions.compileSdkVersion
 
+            android {
+                defaultConfig {
+                    minSdkVersion versions.minSdkVersion
+                    targetSdkVersion versions.targetSdkVersion
+                    vectorDrawables.useSupportLibrary = true
+                }
 
-            android.defaultConfig {
-                minSdkVersion versions.minSdkVersion
-                targetSdkVersion versions.targetSdkVersion
-                vectorDrawables.useSupportLibrary = true
-            }
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+                kotlinOptions {
+                    jvmTarget = '17'
+                }
 
-            android.compileOptions {
-                sourceCompatibility JavaVersion.VERSION_1_8
-                targetCompatibility JavaVersion.VERSION_1_8
+                // Include sources in the jar
+                publishing {
+                    singleVariant("release") {
+                        withSourcesJar()
+                        withJavadocJar()
+                    }
+                }
             }
         }
     }
@@ -50,4 +62,5 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
 apply from: "${rootDir}/publish-root.gradle"
