@@ -91,7 +91,7 @@ internal class ConfigAdapter(
                 oldItem.key == newItem.key
 
             override fun areContentsTheSame(oldItem: ConfigAdapterModel, newItem: ConfigAdapterModel): Boolean =
-                oldItem.toString() == newItem.toString()
+                oldItem == newItem
         }
     }
 }

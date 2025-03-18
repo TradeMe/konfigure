@@ -44,4 +44,8 @@ internal sealed class ConfigAdapterModel(val key: String? = null) {
         val isModified: Boolean,
         val metadata: DisplayMetadata
     ) : ConfigAdapterModel(key = item.key)
+
+    override fun equals(other: Any?): Boolean {
+        return other is ConfigAdapterModel && this.toString() == other.toString()
+    }
 }
