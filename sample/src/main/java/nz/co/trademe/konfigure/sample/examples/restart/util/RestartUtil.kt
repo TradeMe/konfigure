@@ -37,7 +37,7 @@ private fun restartApp(activity: AppCompatActivity) {
     activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
 
     // Create a pending intent so the application is restarted after exit(0) is called.
-    val pendingIntent = PendingIntent.getActivity(activity, 0, activityIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+    val pendingIntent = PendingIntent.getActivity(activity, 0, activityIntent, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
     // Use AlarmManager to call this intent in 100ms.
     val alarmManager = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager?
