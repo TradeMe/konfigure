@@ -41,6 +41,7 @@ afterEvaluate {
                 } else {
                     from components.java
                     artifact(tasks["kotlinSources"])
+                    artifact(tasks["javadocJar"])
                 }
 
                 // metadata
