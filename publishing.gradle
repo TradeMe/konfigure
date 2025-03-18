@@ -41,6 +41,7 @@ afterEvaluate {
                 } else {
                     from components.java
                     artifact(tasks["kotlinSources"])
+                    artifact(tasks["javadocJar"])
                 }
 
                 // metadata
@@ -55,7 +56,11 @@ afterEvaluate {
                         }
                     }
                     developers {
-                        // Add all other devs here...
+                        developer {
+                            id = 'james'
+                            name = 'James Barfoote'
+                            email = 'james.barfoote@trademe.co.nz'
+                        }
                     }
 
                     // Version control info - if you're using GitHub, follow the
