@@ -6,20 +6,22 @@ buildscript {
         google()
         maven { url "https://jitpack.io" }
         mavenLocal()
+        gradlePluginPortal()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$versions.androidgradleplugin"
+        classpath "org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin:${versions.kotlin}"
     }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 ext {
     PUBLISH_VERSION = rootVersionName
     ARTIFACT_ID = "konfigure-android"
 }
-
 
 apply from: '../common.gradle'
 apply from: '../publishing.gradle'
@@ -28,7 +30,8 @@ android {
     namespace 'nz.co.trademe.konfigure.android'
 
     buildFeatures {
-        viewBinding true
+        viewBinding true // can we remove this??
+        compose true
     }
 }
 
@@ -44,4 +47,14 @@ dependencies {
     implementation "com.google.android.material:material:$versions.material"
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+
+    // Jetpack Compose Dependencies
+    implementation(platform("androidx.compose:compose-bom:$versions.composeBom"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.activity:activity-compose")
+    // Tooling for previews in Android Studio
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.compose.ui:ui-tooling-preview")
 }

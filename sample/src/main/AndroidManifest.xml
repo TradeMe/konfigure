@@ -29,6 +29,11 @@
             tools:replace="android:theme"/>
 
         <activity
+            android:name="nz.co.trademe.konfigure.android.ui.ComposeConfigActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:replace="android:theme"/>
+
+        <activity
             android:name=".examples.restart.ConfigRestartActivity"
             android:theme="@style/AppTheme.NoActionBar" />
 

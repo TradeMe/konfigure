@@ -2,6 +2,7 @@ package nz.co.trademe.konfigure.sample.examples
 
 import androidx.appcompat.app.AppCompatActivity
 import nz.co.trademe.konfigure.sample.examples.basic.BasicExample
+import nz.co.trademe.konfigure.sample.examples.compose.ComposeExample
 import nz.co.trademe.konfigure.sample.examples.filtering.FilteringExample
 import nz.co.trademe.konfigure.sample.examples.restart.RestartExample
 
@@ -14,6 +15,7 @@ interface Example {
 
 val AllExamples = listOf(
     BasicExample,
+    ComposeExample,
     RestartExample,
     FilteringExample
 )
