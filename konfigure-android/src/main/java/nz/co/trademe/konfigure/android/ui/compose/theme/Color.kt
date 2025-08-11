@@ -1,4 +1,4 @@
-package nz.co.trademe.konfigure.android.ui.theme
+package nz.co.trademe.konfigure.android.ui.compose.theme
 
 import androidx.compose.ui.graphics.Color
 

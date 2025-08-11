@@ -1,7 +1,7 @@
 package nz.co.trademe.konfigure.sample.examples.compose
 
 import androidx.appcompat.app.AppCompatActivity
-import nz.co.trademe.konfigure.android.ui.ComposeConfigActivity
+import nz.co.trademe.konfigure.android.ui.compose.ComposeConfigActivity
 import nz.co.trademe.konfigure.sample.examples.Example
 import nz.co.trademe.konfigure.android.ui.ConfigActivity
 

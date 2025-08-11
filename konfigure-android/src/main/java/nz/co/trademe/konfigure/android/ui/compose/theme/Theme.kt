@@ -1,4 +1,4 @@
-package nz.co.trademe.konfigure.android.ui.theme
+package nz.co.trademe.konfigure.android.ui.compose.theme
 
 import android.app.Activity
 import android.os.Build
@@ -10,7 +10,6 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.layout.view
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowInsetsControllerCompat

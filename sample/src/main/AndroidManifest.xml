@@ -29,7 +29,7 @@
             tools:replace="android:theme"/>
 
         <activity
-            android:name="nz.co.trademe.konfigure.android.ui.ComposeConfigActivity"
+            android:name="nz.co.trademe.konfigure.android.ui.compose.ComposeConfigActivity"
             android:theme="@style/AppTheme.NoActionBar"
             tools:replace="android:theme"/>
 

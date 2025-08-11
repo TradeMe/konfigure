@@ -20,7 +20,7 @@ import java.util.Date
 private const val EMPTY_SEARCH_TERM = ""
 
 @Suppress("EXPERIMENTAL_API_USAGE")
-internal class ConfigPresenter(
+class ConfigPresenter(
     private val config: Config
 ) {
 
