@@ -54,7 +54,7 @@ open class ComposeConfigActivity : AppCompatActivity() {
                                     itemClass = kClass,
                                     newValue = value,
                                 )
-                            }
+                            } ?: throw IllegalStateException("Config item not found")
                         }
                     },
                 )

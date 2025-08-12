@@ -40,17 +40,19 @@ import nz.co.trademe.konfigure.android.ui.compose.items.StringConfig
 fun ConfigScreen(
     models: List<ConfigAdapterModel>?,
     modifier: Modifier = Modifier,
-    onConfigChanged: (key: String, value: Any) -> Unit,
-    booleanConfig: @Composable (ConfigAdapterModel.BooleanConfig) -> Unit = { config ->
+    onConfigChanged: (key: String?, value: Any) -> Unit,
+    booleanConfig: @Composable (config: ConfigAdapterModel.BooleanConfig) -> Unit = { config ->
         BooleanConfig(
             title = config.metadata.title,
             description = config.metadata.description,
             value = config.value,
             isModified = config.isModified,
-            onValueChange = { TODO() }
+            onValueChange = { newValue ->
+                onConfigChanged(config.key, newValue)
+            }
         )
     },
-    dateConfig: @Composable (ConfigAdapterModel.DateConfig) -> Unit = { config ->
+    dateConfig: @Composable (config: ConfigAdapterModel.DateConfig) -> Unit = { config ->
         DateConfig(
             title = config.metadata.title,
             description = config.metadata.description,
@@ -61,10 +63,10 @@ fun ConfigScreen(
     divider: @Composable () -> Unit = {
         HorizontalDivider()
     },
-    groupHeader: @Composable (ConfigAdapterModel.GroupHeader) -> Unit = { header ->
+    groupHeader: @Composable (header: ConfigAdapterModel.GroupHeader) -> Unit = { header ->
         GroupHeader(name = header.name)
     },
-    numberConfig: @Composable (ConfigAdapterModel.NumberConfig<*>, () -> Unit) -> Unit = { config, onClick ->
+    numberConfig: @Composable (config: ConfigAdapterModel.NumberConfig<*>, () -> Unit) -> Unit = { config, onClick ->
         NumberConfig(
             title = config.metadata.title,
             description = config.metadata.description,
@@ -77,7 +79,7 @@ fun ConfigScreen(
         val context = LocalContext.current
         ResetToDefaultItem { context.applicationConfig.clearOverrides() }
     },
-    stringConfig: @Composable (ConfigAdapterModel.StringConfig, () -> Unit) -> Unit = { config, onClick ->
+    stringConfig: @Composable (config: ConfigAdapterModel.StringConfig, onClick: () -> Unit) -> Unit = { config, onClick ->
         StringConfig(
             title = config.metadata.title,
             description = config.metadata.description,
@@ -167,7 +169,7 @@ fun ConfigScreen(
                                 else -> newValue // Fallback
                             }
                             onConfigChanged(
-                                requireNotNull(itemToEdit.key) { "Key cannot be null when editing" },
+                                itemToEdit.key,
                                 parsedValue,
                             )
                             currentlyEditing = null
