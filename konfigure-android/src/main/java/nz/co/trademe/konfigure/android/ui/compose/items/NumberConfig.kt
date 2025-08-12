@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,18 +20,17 @@ import androidx.compose.ui.unit.dp
 import nz.co.trademe.konfigure.android.ui.compose.theme.KonfigureTheme
 
 @Composable
-fun BooleanConfig(
+fun <T> NumberConfig(
     modifier: Modifier = Modifier,
     title: String,
     description: String,
-    value: Boolean,
+    value: T,
     isModified: Boolean,
-    onValueChange: (Boolean) -> Unit
 ) {
 
     Row(
         modifier = modifier
-            .clickable { onValueChange(!value) }
+            .clickable { TODO() }
             .fillMaxWidth()
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -64,11 +62,12 @@ fun BooleanConfig(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
             )
+            Text(
+                text = value.toString(),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
         }
-        Switch(
-            checked = value,
-            onCheckedChange = onValueChange,
-        )
     }
 }
 
@@ -76,12 +75,11 @@ fun BooleanConfig(
 @Composable
 private fun BooleanConfigPreview() {
     KonfigureTheme {
-        BooleanConfig(
+        NumberConfig(
             title = "Title",
             description = "Description",
-            value = true,
+            value = 3.14159,
             isModified = true,
-            onValueChange = {},
         )
     }
 }

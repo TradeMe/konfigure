@@ -1,8 +1,6 @@
 package nz.co.trademe.konfigure.android.ui.compose
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -25,6 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
 import nz.co.trademe.konfigure.android.ui.compose.items.BooleanConfig
 import nz.co.trademe.konfigure.android.ui.compose.items.GroupHeader
+import nz.co.trademe.konfigure.android.ui.compose.items.NumberConfig
+import nz.co.trademe.konfigure.android.ui.compose.items.StringConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,22 +41,32 @@ fun ConfigScreen(
         )
     },
     dateConfig: @Composable (ConfigAdapterModel.DateConfig) -> Unit = { config ->
-        Text("Date config: $config")
+        Text("TODO Date config: $config")
     },
     divider: @Composable () -> Unit = {
         HorizontalDivider()
     },
     groupHeader: @Composable (ConfigAdapterModel.GroupHeader) -> Unit = { header ->
         GroupHeader(name = header.name)
-                                                                        },
+    },
     numberConfig: @Composable (ConfigAdapterModel.NumberConfig<*>) -> Unit = { config ->
-        Text("Number config: $config")
+        NumberConfig(
+            title = config.metadata.title,
+            description = config.metadata.description,
+            value = config.value,
+            isModified = config.isModified,
+        )
     },
     resetToDefaultFooter: @Composable () -> Unit = {
-        Text("Reset to default footer")
+        Text("TODO Reset to default footer")
     },
     stringConfig: @Composable (ConfigAdapterModel.StringConfig) -> Unit = { config ->
-        Text("String config: $config")
+        StringConfig(
+            title = config.metadata.title,
+            description = config.metadata.description,
+            value = config.value,
+            isModified = config.isModified,
+        )
     },
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
