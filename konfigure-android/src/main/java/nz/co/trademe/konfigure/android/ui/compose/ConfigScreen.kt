@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
 import nz.co.trademe.konfigure.android.ui.compose.items.BooleanConfig
+import nz.co.trademe.konfigure.android.ui.compose.items.DateConfig
 import nz.co.trademe.konfigure.android.ui.compose.items.GroupHeader
 import nz.co.trademe.konfigure.android.ui.compose.items.NumberConfig
 import nz.co.trademe.konfigure.android.ui.compose.items.ResetToDefaultItem
@@ -42,7 +43,12 @@ fun ConfigScreen(
         )
     },
     dateConfig: @Composable (ConfigAdapterModel.DateConfig) -> Unit = { config ->
-        Text("TODO Date config: $config")
+        DateConfig(
+            title = config.metadata.title,
+            description = config.metadata.description,
+            value = config.value,
+            isModified = config.isModified,
+        )
     },
     divider: @Composable () -> Unit = {
         HorizontalDivider()

@@ -8,6 +8,7 @@ import nz.co.trademe.konfigure.sample.config.source.LocalSource
 import nz.co.trademe.konfigure.sample.config.subconfig.TestSubConfig
 import nz.co.trademe.konfigure.sample.examples.filtering.config.UserVisibleSubConfig
 import nz.co.trademe.konfigure.sample.examples.restart.config.RestartableSubconfig
+import java.util.Date
 
 class AppConfig(context: Context): Config(
     configSources = listOf(LocalSource),
@@ -21,12 +22,18 @@ class AppConfig(context: Context): Config(
         description = "This is a test string"
     )
 
-
     val theMeaningOfLife: Int by config(
         key = "life_meaning",
         defaultValue = 42,
         title = "The Meaning of Life",
         description = "As in title. Changing this has undefined output."
+    )
+
+    val testDateConfig: Date by config(
+        key = "test_date_config",
+        defaultValue = Date(),
+        title = "Date Config",
+        description = "This is a test date."
     )
 
     /**
