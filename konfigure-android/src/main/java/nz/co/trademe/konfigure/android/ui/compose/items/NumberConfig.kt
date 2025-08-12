@@ -26,11 +26,12 @@ fun <T> NumberConfig(
     description: String,
     value: T,
     isModified: Boolean,
+    onClick: () -> Unit,
 ) {
 
     Row(
         modifier = modifier
-            .clickable { TODO() }
+            .clickable { onClick() }
             .fillMaxWidth()
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -73,13 +74,13 @@ fun <T> NumberConfig(
 
 @Preview(showBackground = true)
 @Composable
-private fun BooleanConfigPreview() {
+private fun NumberConfigPreview() {
     KonfigureTheme {
         NumberConfig(
             title = "Title",
             description = "Description",
             value = 3.14159,
             isModified = true,
-        )
+        ) {}
     }
 }

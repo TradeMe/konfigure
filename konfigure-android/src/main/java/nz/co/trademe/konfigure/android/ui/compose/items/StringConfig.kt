@@ -26,11 +26,12 @@ fun StringConfig(
     description: String,
     value: String,
     isModified: Boolean,
+    onClick: () -> Unit,
 ) {
 
     Row(
         modifier = modifier
-            .clickable { TODO() }
+            .clickable { onClick() }
             .fillMaxWidth()
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -73,13 +74,13 @@ fun StringConfig(
 
 @Preview(showBackground = true)
 @Composable
-private fun BooleanConfigPreview() {
+private fun StringConfigPreview() {
     KonfigureTheme {
         StringConfig(
             title = "Title",
             description = "Description",
             value = "value",
             isModified = true,
-        )
+        ) {}
     }
 }

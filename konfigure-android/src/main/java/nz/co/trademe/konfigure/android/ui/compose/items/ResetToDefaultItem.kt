@@ -46,7 +46,7 @@ fun ResetToDefaultItem(
 
 @Preview(showBackground = true)
 @Composable
-private fun GroupHeaderPreview() {
+private fun ResetToDefaultItemPreview() {
     KonfigureTheme {
         ResetToDefaultItem {}
     }

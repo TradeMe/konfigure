@@ -10,6 +10,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import nz.co.trademe.konfigure.android.extensions.applicationConfig
 import nz.co.trademe.konfigure.android.ui.compose.theme.KonfigureTheme
 import nz.co.trademe.konfigure.android.ui.view.ConfigPresenter
+import nz.co.trademe.konfigure.model.ConfigItem
+import kotlin.reflect.KClass
 
 /**
  * Basic activity hosting the [ComposeScreen]. This can be extended
@@ -33,7 +35,29 @@ open class ComposeConfigActivity : AppCompatActivity() {
             val models by presenter.models.collectAsStateWithLifecycle(initialValue = emptyList())
 
             KonfigureTheme {
-                ConfigScreen(models = models)
+                ConfigScreen(
+                    models = models,
+                    onConfigChanged = { key, value ->
+                        with(applicationConfig) {
+                            // Locate config by the given key
+                            val item = configItems.find { it.key == key }
+                            item?.let {
+                                // Cast to the required types
+                                @Suppress("UNCHECKED_CAST")
+                                val typedItem = item as ConfigItem<Any>
+                                @Suppress("UNCHECKED_CAST")
+                                val kClass = value::class as KClass<Any>
+
+                                // Set value of config
+                                setValueOf(
+                                    item = typedItem,
+                                    itemClass = kClass,
+                                    newValue = value,
+                                )
+                            }
+                        }
+                    },
+                )
             }
         }
     }

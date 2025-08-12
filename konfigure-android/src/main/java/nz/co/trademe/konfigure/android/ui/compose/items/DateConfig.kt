@@ -112,7 +112,7 @@ private fun Date.format(format: String): String? {
 
 @Preview(showBackground = true)
 @Composable
-private fun BooleanConfigPreview() {
+private fun DateConfigPreview() {
     KonfigureTheme {
         DateConfig(
             title = "Title",

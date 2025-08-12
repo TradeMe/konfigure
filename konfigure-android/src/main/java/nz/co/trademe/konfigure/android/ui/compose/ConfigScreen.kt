@@ -16,11 +16,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import nz.co.trademe.konfigure.android.extensions.applicationConfig
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
+import nz.co.trademe.konfigure.android.ui.compose.components.EditConfigDialog
 import nz.co.trademe.konfigure.android.ui.compose.items.BooleanConfig
 import nz.co.trademe.konfigure.android.ui.compose.items.DateConfig
 import nz.co.trademe.konfigure.android.ui.compose.items.GroupHeader
@@ -33,6 +40,7 @@ import nz.co.trademe.konfigure.android.ui.compose.items.StringConfig
 fun ConfigScreen(
     models: List<ConfigAdapterModel>?,
     modifier: Modifier = Modifier,
+    onConfigChanged: (key: String, value: Any) -> Unit,
     booleanConfig: @Composable (ConfigAdapterModel.BooleanConfig) -> Unit = { config ->
         BooleanConfig(
             title = config.metadata.title,
@@ -56,28 +64,34 @@ fun ConfigScreen(
     groupHeader: @Composable (ConfigAdapterModel.GroupHeader) -> Unit = { header ->
         GroupHeader(name = header.name)
     },
-    numberConfig: @Composable (ConfigAdapterModel.NumberConfig<*>) -> Unit = { config ->
+    numberConfig: @Composable (ConfigAdapterModel.NumberConfig<*>, () -> Unit) -> Unit = { config, onClick ->
         NumberConfig(
             title = config.metadata.title,
             description = config.metadata.description,
             value = config.value,
             isModified = config.isModified,
+            onClick = onClick,
         )
     },
     resetToDefaultFooter: @Composable () -> Unit = {
-        ResetToDefaultItem { TODO() }
+        val context = LocalContext.current
+        ResetToDefaultItem { context.applicationConfig.clearOverrides() }
     },
-    stringConfig: @Composable (ConfigAdapterModel.StringConfig) -> Unit = { config ->
+    stringConfig: @Composable (ConfigAdapterModel.StringConfig, () -> Unit) -> Unit = { config, onClick ->
         StringConfig(
             title = config.metadata.title,
             description = config.metadata.description,
             value = config.value,
             isModified = config.isModified,
+            onClick = onClick,
         )
     },
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    var currentlyEditing by remember { mutableStateOf<ConfigAdapterModel?>(null) }
+    var inputError by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -110,16 +124,59 @@ fun ConfigScreen(
                 models?.let { nonNullModels ->
                     items(nonNullModels) { model ->
                         when (model) {
+                            // Editable items (via dialog)
+                            is ConfigAdapterModel.NumberConfig<*> -> numberConfig(model) { currentlyEditing = model }
+                            is ConfigAdapterModel.StringConfig -> stringConfig(model) { currentlyEditing = model }
+
+                            // Non-editable items
                             is ConfigAdapterModel.BooleanConfig -> booleanConfig(model)
                             is ConfigAdapterModel.DateConfig -> dateConfig(model)
-                            ConfigAdapterModel.Divider -> divider()
                             is ConfigAdapterModel.GroupHeader -> groupHeader(model)
-                            is ConfigAdapterModel.NumberConfig<*> -> numberConfig(model)
+
+                            ConfigAdapterModel.Divider -> divider()
                             ConfigAdapterModel.ResetToDefaultFooter -> resetToDefaultFooter()
-                            is ConfigAdapterModel.StringConfig -> stringConfig(model)
                         }
                     }
                 }
+            }
+
+            currentlyEditing?.let { itemToEdit ->
+                EditConfigDialog(
+                    item = itemToEdit,
+                    inputError = inputError,
+                    onDismissRequest = {
+                        currentlyEditing = null
+                        inputError = null
+                    },
+                    onSave = { newValue ->
+                        // Parse the string back to the correct type and call onConfigChanged
+                        try {
+                            val parsedValue: Any = when (itemToEdit) {
+                                is ConfigAdapterModel.NumberConfig<*> -> {
+                                    // Check the runtime type of the value itself
+                                    when (itemToEdit.value) {
+                                        is Long -> newValue.toLong()
+                                        is Int -> newValue.toInt()
+                                        is Float -> newValue.toFloat()
+                                        is Double -> newValue.toDouble()
+                                        else -> newValue // Fallback for unknown number types
+                                    }
+                                }
+
+                                is ConfigAdapterModel.StringConfig -> newValue
+                                else -> newValue // Fallback
+                            }
+                            onConfigChanged(
+                                requireNotNull(itemToEdit.key) { "Key cannot be null when editing" },
+                                parsedValue,
+                            )
+                            currentlyEditing = null
+                            inputError = null
+                        } catch (e: Exception) {
+                            inputError = e.toString()
+                        }
+                    }
+                )
             }
         }
     )
@@ -129,6 +186,9 @@ fun ConfigScreen(
 @Composable
 private fun ConfigScreenPreview() {
     MaterialTheme {
-//        ConfigScreen()
+        ConfigScreen(
+            models = emptyList(),
+            onConfigChanged = { _, _ -> },
+        )
     }
 }
