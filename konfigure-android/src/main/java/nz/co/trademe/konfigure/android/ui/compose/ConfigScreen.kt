@@ -24,6 +24,7 @@ import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
 import nz.co.trademe.konfigure.android.ui.compose.items.BooleanConfig
 import nz.co.trademe.konfigure.android.ui.compose.items.GroupHeader
 import nz.co.trademe.konfigure.android.ui.compose.items.NumberConfig
+import nz.co.trademe.konfigure.android.ui.compose.items.ResetToDefaultItem
 import nz.co.trademe.konfigure.android.ui.compose.items.StringConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,7 +59,7 @@ fun ConfigScreen(
         )
     },
     resetToDefaultFooter: @Composable () -> Unit = {
-        Text("TODO Reset to default footer")
+        ResetToDefaultItem { TODO() }
     },
     stringConfig: @Composable (ConfigAdapterModel.StringConfig) -> Unit = { config ->
         StringConfig(
