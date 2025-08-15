@@ -37,6 +37,9 @@ fun DateConfig(
     description: String,
     value: Date,
     isModified: Boolean,
+    onDateClick: () -> Unit,
+    onTimeClick:() -> Unit,
+    onTodayClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -81,20 +84,20 @@ fun DateConfig(
         ) {
             InputChip(
                 selected = true,
-                onClick = {},
+                onClick = onDateClick,
                 label = {
                     Text(text = "${value.format(MED_DATE_FORMAT)}")
                 }
             )
             InputChip(
                 selected = true,
-                onClick = {},
+                onClick = onTimeClick,
                 label = {
                     Text(text = "${value.format(TIME_FORMAT)}")
                 }
             )
             SuggestionChip(
-                onClick = {},
+                onClick = onTodayClick,
                 label = {
                     Text(text = stringResource(id = R.string.today))
                 },
@@ -119,6 +122,9 @@ private fun DateConfigPreview() {
             description = "Description",
             value = Date(),
             isModified = true,
+            onDateClick = {},
+            onTimeClick = {},
+            onTodayClick = {},
         )
     }
 }

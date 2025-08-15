@@ -1,7 +1,9 @@
 package nz.co.trademe.konfigure.android.ui.compose
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -58,6 +60,9 @@ fun ConfigScreen(
             description = config.metadata.description,
             value = config.value,
             isModified = config.isModified,
+            onDateClick = { TODO() },
+            onTimeClick = { TODO() },
+            onTodayClick = { TODO() },
         )
     },
     divider: @Composable () -> Unit = {
@@ -66,7 +71,7 @@ fun ConfigScreen(
     groupHeader: @Composable (header: ConfigAdapterModel.GroupHeader) -> Unit = { header ->
         GroupHeader(name = header.name)
     },
-    numberConfig: @Composable (config: ConfigAdapterModel.NumberConfig<*>, () -> Unit) -> Unit = { config, onClick ->
+    numberConfig: @Composable (config: ConfigAdapterModel.NumberConfig<*>, onClick: () -> Unit) -> Unit = { config, onClick ->
         NumberConfig(
             title = config.metadata.title,
             description = config.metadata.description,
@@ -126,15 +131,14 @@ fun ConfigScreen(
                 models?.let { nonNullModels ->
                     items(nonNullModels) { model ->
                         when (model) {
-                            // Editable items (via dialog)
+                            // Config items
                             is ConfigAdapterModel.NumberConfig<*> -> numberConfig(model) { currentlyEditing = model }
                             is ConfigAdapterModel.StringConfig -> stringConfig(model) { currentlyEditing = model }
-
-                            // Non-editable items
                             is ConfigAdapterModel.BooleanConfig -> booleanConfig(model)
                             is ConfigAdapterModel.DateConfig -> dateConfig(model)
-                            is ConfigAdapterModel.GroupHeader -> groupHeader(model)
 
+                            // Non-config items
+                            is ConfigAdapterModel.GroupHeader -> groupHeader(model)
                             ConfigAdapterModel.Divider -> divider()
                             ConfigAdapterModel.ResetToDefaultFooter -> resetToDefaultFooter()
                         }
