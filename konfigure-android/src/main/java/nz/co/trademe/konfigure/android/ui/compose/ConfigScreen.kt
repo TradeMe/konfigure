@@ -57,9 +57,9 @@ fun ConfigScreen(
             description = config.metadata.description,
             value = config.value,
             isModified = config.isModified,
-            onDateClick = { TODO() },
-            onTimeClick = { TODO() },
-            onTodayClick = { TODO() },
+            onConfigChange = { newValue ->
+                onConfigChanged(config.key, newValue)
+            }
         )
     },
     divider: @Composable () -> Unit = {
