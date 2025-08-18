@@ -1,23 +1,16 @@
 package nz.co.trademe.konfigure.android.ui.compose
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,11 +18,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import nz.co.trademe.konfigure.android.extensions.applicationConfig
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
 import nz.co.trademe.konfigure.android.ui.compose.components.EditConfigDialog
+import nz.co.trademe.konfigure.android.ui.compose.components.SearchableTopBar
+import nz.co.trademe.konfigure.android.ui.compose.components.SearchableTopBarState
 import nz.co.trademe.konfigure.android.ui.compose.items.BooleanConfig
 import nz.co.trademe.konfigure.android.ui.compose.items.DateConfig
 import nz.co.trademe.konfigure.android.ui.compose.items.GroupHeader
@@ -43,6 +39,7 @@ fun ConfigScreen(
     models: List<ConfigAdapterModel>?,
     modifier: Modifier = Modifier,
     onConfigChanged: (key: String?, value: Any) -> Unit,
+    onSearch: (query: String) -> Unit,
     booleanConfig: @Composable (config: ConfigAdapterModel.BooleanConfig) -> Unit = { config ->
         BooleanConfig(
             title = config.metadata.title,
@@ -96,38 +93,52 @@ fun ConfigScreen(
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val lazyListState = rememberLazyListState()
 
+    // Search state
+    var isSearchActive by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    val searchState = remember(isSearchActive, searchQuery) {
+        SearchableTopBarState(
+            isSearchActive = isSearchActive,
+            searchQuery = searchQuery,
+            onIsSearchActiveChange = { newIsSearchActive -> isSearchActive = newIsSearchActive },
+            onQueryChange = { newQuery -> searchQuery = newQuery },
+        )
+    }
+
+    // Edit config state
     var currentlyEditing by remember { mutableStateOf<ConfigAdapterModel?>(null) }
     var inputError by remember { mutableStateOf<String?>(null) }
+
+    // Hide keyboard and clear focus when scrolling
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    LaunchedEffect(lazyListState.isScrollInProgress) {
+        if (lazyListState.isScrollInProgress) {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
+    }
+
+    LaunchedEffect(searchQuery) {
+        onSearch(searchQuery)
+    }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text("Configuration", maxLines = 1, overflow = TextOverflow.Ellipsis)
-                },
-                navigationIcon = {
-                    IconButton(onClick = { backDispatcher?.onBackPressed() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { TODO() }) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
-                        )
-                    }
-                },
+            SearchableTopBar(
+                state = searchState,
                 scrollBehavior = scrollBehavior,
+                onBack = { backDispatcher?.onBackPressed() }
             )
         },
         content = { innerPadding ->
-            LazyColumn(contentPadding = innerPadding) {
+            LazyColumn(
+                state = lazyListState,
+                contentPadding = innerPadding,
+            ) {
                 models?.let { nonNullModels ->
                     items(nonNullModels) { model ->
                         when (model) {
@@ -195,6 +206,7 @@ private fun ConfigScreenPreview() {
         ConfigScreen(
             models = emptyList(),
             onConfigChanged = { _, _ -> },
+            onSearch = {},
         )
     }
 }

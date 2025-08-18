@@ -14,4 +14,10 @@
     <string name="reset_experiments_description">Reset all config values back to their default state</string>
     <string name="configuration">Configuration</string>
     <string name="today">Today</string>
+
+    <string name="content_description_searchable_top_bar_close_button">Close</string>
+    <string name="content_description_searchable_top_bar_clear_button">Clear</string>
+    <string name="content_description_searchable_top_bar_search_button">Search</string>
+    <string name="placeholder_searchable_top_bar_text_field">Search</string>
+    <string name="content_description_searchable_top_bar_back_button">Back</string>
 </resources>

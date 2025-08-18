@@ -14,11 +14,7 @@ import nz.co.trademe.konfigure.model.ConfigItem
 import kotlin.reflect.KClass
 
 /**
- * Basic activity hosting the [ComposeScreen]. This can be extended
- * to add basic functionality, like filtering of config items. Alternatively, [ComposeScreen]
- * can be used independently.
- *
- * To use, simply call [ComposeConfigActivity.start]
+ * Basic example of using [ComposeScreen].
  */
 open class ComposeConfigActivity : AppCompatActivity() {
 
@@ -37,6 +33,7 @@ open class ComposeConfigActivity : AppCompatActivity() {
             KonfigureTheme {
                 ConfigScreen(
                     models = models,
+                    onSearch = { presenter.search(it) },
                     onConfigChanged = { key, value ->
                         with(applicationConfig) {
                             // Locate config by the given key
