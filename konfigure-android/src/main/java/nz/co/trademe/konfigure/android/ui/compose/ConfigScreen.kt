@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import nz.co.trademe.konfigure.android.extensions.applicationConfig
 import nz.co.trademe.konfigure.android.ui.adapter.ConfigAdapterModel
-import nz.co.trademe.konfigure.android.ui.compose.components.EditConfigDialog
 import nz.co.trademe.konfigure.android.ui.compose.components.SearchableTopBar
 import nz.co.trademe.konfigure.android.ui.compose.components.SearchableTopBarState
 import nz.co.trademe.konfigure.android.ui.compose.items.BooleanConfig
@@ -68,26 +67,30 @@ fun ConfigScreen(
     groupHeader: @Composable (header: ConfigAdapterModel.GroupHeader) -> Unit = { header ->
         GroupHeader(name = header.name)
     },
-    numberConfig: @Composable (config: ConfigAdapterModel.NumberConfig<*>, onClick: () -> Unit) -> Unit = { config, onClick ->
+    numberConfig: @Composable (config: ConfigAdapterModel.NumberConfig<*>) -> Unit = { config ->
         NumberConfig(
             title = config.metadata.title,
             description = config.metadata.description,
             value = config.value,
             isModified = config.isModified,
-            onClick = onClick,
+            onConfigChange = { newValue ->
+                onConfigChanged(config.key, newValue)
+            },
         )
     },
     resetToDefaultFooter: @Composable () -> Unit = {
         val context = LocalContext.current
         ResetToDefaultItem { context.applicationConfig.clearOverrides() }
     },
-    stringConfig: @Composable (config: ConfigAdapterModel.StringConfig, onClick: () -> Unit) -> Unit = { config, onClick ->
+    stringConfig: @Composable (config: ConfigAdapterModel.StringConfig) -> Unit = { config ->
         StringConfig(
             title = config.metadata.title,
             description = config.metadata.description,
             value = config.value,
             isModified = config.isModified,
-            onClick = onClick,
+            onConfigChange = { newValue ->
+                onConfigChanged(config.key, newValue)
+            },
         )
     },
 ) {
@@ -106,10 +109,6 @@ fun ConfigScreen(
             onQueryChange = { newQuery -> searchQuery = newQuery },
         )
     }
-
-    // Edit config state
-    var currentlyEditing by remember { mutableStateOf<ConfigAdapterModel?>(null) }
-    var inputError by remember { mutableStateOf<String?>(null) }
 
     // Hide keyboard and clear focus when scrolling
     val focusManager = LocalFocusManager.current
@@ -143,8 +142,8 @@ fun ConfigScreen(
                     items(nonNullModels) { model ->
                         when (model) {
                             // Config items
-                            is ConfigAdapterModel.NumberConfig<*> -> numberConfig(model) { currentlyEditing = model }
-                            is ConfigAdapterModel.StringConfig -> stringConfig(model) { currentlyEditing = model }
+                            is ConfigAdapterModel.NumberConfig<*> -> numberConfig(model)
+                            is ConfigAdapterModel.StringConfig -> stringConfig(model)
                             is ConfigAdapterModel.BooleanConfig -> booleanConfig(model)
                             is ConfigAdapterModel.DateConfig -> dateConfig(model)
 
@@ -155,45 +154,6 @@ fun ConfigScreen(
                         }
                     }
                 }
-            }
-
-            currentlyEditing?.let { itemToEdit ->
-                EditConfigDialog(
-                    item = itemToEdit,
-                    inputError = inputError,
-                    onDismissRequest = {
-                        currentlyEditing = null
-                        inputError = null
-                    },
-                    onSave = { newValue ->
-                        // Parse the string back to the correct type and call onConfigChanged
-                        try {
-                            val parsedValue: Any = when (itemToEdit) {
-                                is ConfigAdapterModel.NumberConfig<*> -> {
-                                    // Check the runtime type of the value itself
-                                    when (itemToEdit.value) {
-                                        is Long -> newValue.toLong()
-                                        is Int -> newValue.toInt()
-                                        is Float -> newValue.toFloat()
-                                        is Double -> newValue.toDouble()
-                                        else -> newValue // Fallback for unknown number types
-                                    }
-                                }
-
-                                is ConfigAdapterModel.StringConfig -> newValue
-                                else -> newValue // Fallback
-                            }
-                            onConfigChanged(
-                                itemToEdit.key,
-                                parsedValue,
-                            )
-                            currentlyEditing = null
-                            inputError = null
-                        } catch (e: Exception) {
-                            inputError = e.toString()
-                        }
-                    }
-                )
             }
         }
     )
