@@ -1,8 +1,10 @@
 package nz.co.trademe.konfigure.android.ui.compose
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -139,24 +141,53 @@ fun ConfigScreen(
                 contentPadding = innerPadding,
             ) {
                 models?.let { nonNullModels ->
-                    items(nonNullModels) { model ->
-                        when (model) {
-                            // Config items
-                            is ConfigAdapterModel.NumberConfig<*> -> numberConfig(model)
-                            is ConfigAdapterModel.StringConfig -> stringConfig(model)
-                            is ConfigAdapterModel.BooleanConfig -> booleanConfig(model)
-                            is ConfigAdapterModel.DateConfig -> dateConfig(model)
+                    itemsIndexed(
+                        items = nonNullModels,
+                        key = { index, _ ->
+                            nonNullModels.getKeyForItemAt(index)
+                        }
+                    ) { index, model ->
+                        Box(
+                            modifier = Modifier.animateItem()
+                        ) {
+                            when (model) {
+                                // Config items
+                                is ConfigAdapterModel.NumberConfig<*> -> numberConfig(model)
+                                is ConfigAdapterModel.StringConfig -> stringConfig(model)
+                                is ConfigAdapterModel.BooleanConfig -> booleanConfig(model)
+                                is ConfigAdapterModel.DateConfig -> dateConfig(model)
 
-                            // Non-config items
-                            is ConfigAdapterModel.GroupHeader -> groupHeader(model)
-                            ConfigAdapterModel.Divider -> divider()
-                            ConfigAdapterModel.ResetToDefaultFooter -> resetToDefaultFooter()
+                                // Non-config items
+                                is ConfigAdapterModel.GroupHeader -> groupHeader(model)
+                                ConfigAdapterModel.Divider -> divider()
+                                ConfigAdapterModel.ResetToDefaultFooter -> resetToDefaultFooter()
+                            }
                         }
                     }
                 }
             }
         }
     )
+}
+
+/**
+ * Provides a unique and stable key for any given [ConfigAdapterModel]
+ * based on the item's key and the group it's in.
+ *
+ * This is required for two reasons:
+ * 1. Divider doesn't have a key, and
+ * 2. Items are duplicated to be additionally shown in the 'Overrides' group.
+ *
+ * @param model The adapter model for which to generate a key.
+ * @param index The index of the model in the list.
+ * @return A unique key suitable for use in a LazyColumn.
+ */
+private fun List<ConfigAdapterModel>.getKeyForItemAt(index: Int): Any {
+    val item = this[index]
+    val groupHeader = subList(0, index).findLast {
+        it is ConfigAdapterModel.GroupHeader
+    } as? ConfigAdapterModel.GroupHeader
+    return "${groupHeader?.key}:${item.key}"
 }
 
 @Preview
